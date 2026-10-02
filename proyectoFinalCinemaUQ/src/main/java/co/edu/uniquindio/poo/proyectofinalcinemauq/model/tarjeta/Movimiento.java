@@ -2,74 +2,32 @@ package co.edu.uniquindio.poo.proyectofinalcinemauq.model.tarjeta;
 
 import java.time.LocalDateTime;
 
-public class Movimiento {
+//cambie la clase movimiento a una abstracta
 
-    //Atributso
-    private String referencia;
-    private TipoMovimiento tipoMovimiento;
-    private double cantidad;
-    private LocalDateTime fechaMovimiento;
-    private double saldoResultante;
-    private String descripcion;
+public abstract class Movimiento {
 
-    //Constructor
-    public Movimiento(String referencia, TipoMovimiento tipoMovimiento,
-                      double cantidad, LocalDateTime fechaMovimiento, double saldoResultante, String descripcion) {
+    private final String referencia;
+    private final double cantidad;
+    private final LocalDateTime fechaMovimiento;
+    private final double saldoResultante;
+    private final String descripcion;
+
+    protected Movimiento(String referencia, double cantidad,
+                         double saldoResultante, String descripcion) {
         this.referencia = referencia;
-        this.tipoMovimiento = tipoMovimiento;
         this.cantidad = cantidad;
-        this.fechaMovimiento = fechaMovimiento;
+        this.fechaMovimiento = LocalDateTime.now();
         this.saldoResultante = saldoResultante;
         this.descripcion = descripcion;
     }
 
-    //Getters y setters
+    // Cada subclase declara su tipo y si suma o resta al saldo
+    public abstract TipoMovimiento getTipoMovimiento();
+    public abstract boolean esIngreso();
 
-    public String getReferencia() {
-        return referencia;
-    }
-
-    public void setReferencia(String referencia) {
-        this.referencia = referencia;
-    }
-
-    public TipoMovimiento getTipoMovimiento() {
-        return tipoMovimiento;
-    }
-
-    public void setTipoMovimiento(TipoMovimiento tipoMovimiento) {
-        this.tipoMovimiento = tipoMovimiento;
-    }
-
-    public double getCantidad() {
-        return cantidad;
-    }
-
-    public void setCantidad(double cantidad) {
-        this.cantidad = cantidad;
-    }
-
-    public LocalDateTime getFechaMovimiento() {
-        return fechaMovimiento;
-    }
-
-    public void setFechaMovimiento(LocalDateTime fechaMovimiento) {
-        this.fechaMovimiento = fechaMovimiento;
-    }
-
-    public double getSaldoResultante() {
-        return saldoResultante;
-    }
-
-    public void setSaldoResultante(double saldoResultante) {
-        this.saldoResultante = saldoResultante;
-    }
-
-    public String getDescripcion() {
-        return descripcion;
-    }
-
-    public void setDescripcion(String descripcion) {
-        this.descripcion = descripcion;
-    }
+    public String getReferencia() { return referencia; }
+    public double getCantidad() { return cantidad; }
+    public LocalDateTime getFechaMovimiento() { return fechaMovimiento; }
+    public double getSaldoResultante() { return saldoResultante; }
+    public String getDescripcion() { return descripcion; }
 }

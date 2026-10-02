@@ -1,6 +1,8 @@
 package co.edu.uniquindio.poo.proyectofinalcinemauq.model.reporte;
 
-public interface ReporteFactory {
+import java.time.LocalDate;
+import java.util.List;
 
-        String generarReporte();
+public interface ReporteFactory {
+    Reporte crearReporte(String titulo, LocalDate desde, LocalDate hasta, List<String> lineas, double total);
 }

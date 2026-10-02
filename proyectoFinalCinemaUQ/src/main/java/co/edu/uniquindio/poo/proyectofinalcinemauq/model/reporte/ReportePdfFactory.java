@@ -1,9 +1,12 @@
 package co.edu.uniquindio.poo.proyectofinalcinemauq.model.reporte;
 
-public class ReportePdfFactory implements ReporteFactory{
+import java.time.LocalDate;
+import java.util.List;
+
+public class ReportePdfFactory implements ReporteFactory {
 
     @Override
-    public String generarReporte() {
-        return "Reporte de pdfs";
+    public Reporte crearReporte(String titulo, LocalDate desde, LocalDate hasta, List<String> lineas, double total) {
+        return new ReportePdf(titulo, desde, hasta, lineas, total);
     }
 }

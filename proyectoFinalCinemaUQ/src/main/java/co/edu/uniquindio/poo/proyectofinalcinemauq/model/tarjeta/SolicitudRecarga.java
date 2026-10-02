@@ -6,65 +6,45 @@ import java.time.LocalDateTime;
 
 public class SolicitudRecarga {
 
-    //Atributos
-    private String referencia;
-    private Cliente cliente;
-    private double cantidad;
-    private LocalDateTime fechaSolicitud;
+    private final String referencia;
+    private final Cliente cliente;
+    private final double cantidad;
+    private final LocalDateTime fechaSolicitud;
     private EstadoSolicitud estadoSolicitud;
 
-    //Constructor
-
-
-    public SolicitudRecarga(String referencia, Cliente cliente, double cantidad,
-                            LocalDateTime fechaSolicitud, EstadoSolicitud estadoSolicitud) {
-        this.referencia = referencia;
+    public SolicitudRecarga(Cliente cliente, double cantidad) throws MontoInvalidoException {
+        if (cliente == null) {
+            throw new IllegalArgumentException("La solicitud debe tener un cliente");
+        }
+        if (cantidad <= 0) {
+            throw new MontoInvalidoException("El monto de la recarga debe ser mayor a cero");
+        }
+        this.referencia = "SOL-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
         this.cliente = cliente;
         this.cantidad = cantidad;
-        this.fechaSolicitud = fechaSolicitud;
-        this.estadoSolicitud = estadoSolicitud;
+        this.fechaSolicitud = LocalDateTime.now();
+        this.estadoSolicitud = EstadoSolicitud.PENDIENTE;
     }
 
-    //Getters y setters
-
-
-    public String getReferencia() {
-        return referencia;
+    public void aprobar() throws SolicitudInvalidaException {
+        validarPendiente();
+        this.estadoSolicitud = EstadoSolicitud.APROBADA;
     }
 
-    public void setReferencia(String referencia) {
-        this.referencia = referencia;
+    public void rechazar() throws SolicitudInvalidaException {
+        validarPendiente();
+        this.estadoSolicitud = EstadoSolicitud.RECHAZADA;
     }
 
-    public double getCantidad() {
-        return cantidad;
+    private void validarPendiente() throws SolicitudInvalidaException {
+        if (estadoSolicitud != EstadoSolicitud.PENDIENTE) {
+            throw new SolicitudInvalidaException("La solicitud ya fue procesada");
+        }
     }
 
-    public void setCantidad(double cantidad) {
-        this.cantidad = cantidad;
-    }
-
-    public Cliente getCliente() {
-        return cliente;
-    }
-
-    public void setCliente(Cliente cliente) {
-        this.cliente = cliente;
-    }
-
-    public LocalDateTime getFechaSolicitud() {
-        return fechaSolicitud;
-    }
-
-    public void setFechaSolicitud(LocalDateTime fechaSolicitud) {
-        this.fechaSolicitud = fechaSolicitud;
-    }
-
-    public EstadoSolicitud getEstadoSolicitud() {
-        return estadoSolicitud;
-    }
-
-    public void setEstadoSolicitud(EstadoSolicitud estadoSolicitud) {
-        this.estadoSolicitud = estadoSolicitud;
-    }
+    public String getReferencia() { return referencia; }
+    public Cliente getCliente() { return cliente; }
+    public double getCantidad() { return cantidad; }
+    public LocalDateTime getFechaSolicitud() { return fechaSolicitud; }
+    public EstadoSolicitud getEstadoSolicitud() { return estadoSolicitud; }
 }
