@@ -14,7 +14,8 @@ public class Compra {
     private String id;
     private Cliente cliente;
     private LocalDateTime fecha;
-    private List<Entrada> entradas ;
+    private List<Entrada> listaEntradas ;
+    private List<LineaCompra> listaLineas;
     private List<Promocion> promociones ;
     private double subtotal;
     private double descuento ;
@@ -28,12 +29,21 @@ public class Compra {
         this.id = builder.id;
         this.cliente = builder.cliente;
         this.fecha = LocalDateTime.now();
-        this.entradas = new ArrayList<>(builder.entradas);
+        this.listaEntradas = new ArrayList<>(builder.listaEntradas);
+        this.listaLineas = new ArrayList<>();
         this.promociones = new ArrayList<>();
         this.estado = EstadoCompra.PENDIENTE;
     }
 
     //Getters
+
+    public List<LineaCompra> getListaLineas() {
+        return listaLineas;
+    }
+
+    public void setListaLineas(List<LineaCompra> listaLineas) {
+        this.listaLineas = listaLineas;
+    }
 
     public String getId() {
         return id;
@@ -47,8 +57,8 @@ public class Compra {
         return fecha;
     }
 
-    public List<Entrada> getEntradas() {
-        return entradas;
+    public List<Entrada> getListaEntradas() {
+        return listaEntradas;
     }
 
     public List<Promocion> getPromociones() {

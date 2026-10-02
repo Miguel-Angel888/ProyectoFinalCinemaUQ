@@ -1,8 +1,11 @@
 package co.edu.uniquindio.poo.proyectofinalcinemauq.model.perfil;
 
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.tarjeta.TarjetaVirtual;
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.venta.Compra;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
-/*
+
 public class Cliente extends Usuario {
 
     //Atributos
@@ -45,4 +48,3 @@ public class Cliente extends Usuario {
         this.listaCompras = listaCompras;
     }
 }
-*/
