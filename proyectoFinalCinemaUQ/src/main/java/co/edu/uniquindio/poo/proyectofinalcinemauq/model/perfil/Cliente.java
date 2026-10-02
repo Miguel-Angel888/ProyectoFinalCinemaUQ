@@ -2,7 +2,7 @@ package co.edu.uniquindio.poo.proyectofinalcinemauq.model.perfil;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
-
+/*
 public class Cliente extends Usuario {
 
     //Atributos
@@ -45,3 +45,4 @@ public class Cliente extends Usuario {
         this.listaCompras = listaCompras;
     }
 }
+*/

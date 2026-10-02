@@ -1,5 +1,7 @@
 package co.edu.uniquindio.poo.proyectofinalcinemauq.model.tarjeta;
 
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.venta.Compra;
+
 import java.time.LocalDateTime;
 
 public class Reembolso {
