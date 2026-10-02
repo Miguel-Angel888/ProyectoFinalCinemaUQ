@@ -1,5 +1,8 @@
 package co.edu.uniquindio.poo.proyectofinalcinemauq.model.venta;
 
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.cartelera.Asiento;
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.cartelera.Funcion;
+
 public class Entrada {
 
     //Atributos

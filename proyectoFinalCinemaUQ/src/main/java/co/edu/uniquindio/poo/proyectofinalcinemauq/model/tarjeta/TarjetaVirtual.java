@@ -1,4 +1,5 @@
 package co.edu.uniquindio.poo.proyectofinalcinemauq.model.tarjeta;
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.exceptions.CinemaUQException;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -54,24 +55,24 @@ public class TarjetaVirtual {
 
     //operaciones
 
-    public void recargar(double monto) throws MontoInvalidoException, TarjetaInactivaException {
+    public void recargar(double monto) throws CinemaUQException.MontoInvalidoException, CinemaUQException.TarjetaInactivaException {
         validarMonto(monto);
         validarActiva();
         saldo += monto;
         listaMovimientos.add(recargaCreator.registrar(monto, saldo, "Recarga de saldo"));
     }
 
-    public void debitar (double monto, String descripcion) throws MontoInvalidoException, TarjetaInactivaException, SaldoInsuficienteException {
+    public void debitar (double monto, String descripcion) throws CinemaUQException.MontoInvalidoException, CinemaUQException.TarjetaInactivaException, CinemaUQException.SaldoInsuficienteException {
         validarMonto(monto);
         validarActiva();
         if (saldo < monto) {
-            throw new SaldoInsuficienteException("Saldo insuficiente. Saldo disponible: " + saldo);
+            throw new CinemaUQException.SaldoInsuficienteException("Saldo insuficiente. Saldo disponible: " + saldo);
         }
         saldo -= monto;
         listaMovimientos.add(pagoCreator.registrar(monto, saldo, descripcion));
     }
 
-    public void acreditar (double monto, String descripcion) throws MontoInvalidoException, TarjetaInactivaException {
+    public void acreditar (double monto, String descripcion) throws CinemaUQException.MontoInvalidoException, CinemaUQException.TarjetaInactivaException {
         validarMonto(monto);
         validarActiva();
         saldo += monto;
@@ -91,14 +92,14 @@ public class TarjetaVirtual {
 
     //validaciones privadas
 
-    private void validarMonto(double monto) throws MontoInvalidoException{
-        if (monto <= 0) throw new MontoInvalidoException("El monto debe ser mayor a 0");
+    private void validarMonto(double monto) throws CinemaUQException.MontoInvalidoException {
+        if (monto <= 0) throw new CinemaUQException.MontoInvalidoException("El monto debe ser mayor a 0");
 
     }
 
-    private void validarActiva() throws TarjetaInactivaException {
+    private void validarActiva() throws CinemaUQException.TarjetaInactivaException {
         if (estadoTarjeta != EstadoTarjeta.ACTIVA) {
-            throw new TarjetaInactivaException("La tarjeta no esta activa");
+            throw new CinemaUQException.TarjetaInactivaException("La tarjeta no esta activa");
         }
 
     }
