@@ -56,7 +56,7 @@ public class ReportePdf extends Reporte {
     }
 
     // PDFBox no acepta saltos de línea ni tabulaciones dentro de showText
-    // entoncse se separa el texto en líneas y se parten las muy largas
+    // entonces se separa el texto en líneas y se parten las muy largas
     private List<String> prepararLineas(String texto) {
         List<String> resultado = new ArrayList<>();
         for (String linea : texto.replace("\r", "").replace("\t", "    ").split("\n", -1)) {

@@ -7,7 +7,7 @@ import java.util.List;
 
 public class TarjetaVirtual {
 
-    //Artributos
+    //Atributos
     private String numeroTarjeta;
     private double saldo;
     private EstadoTarjeta estadoTarjeta;
