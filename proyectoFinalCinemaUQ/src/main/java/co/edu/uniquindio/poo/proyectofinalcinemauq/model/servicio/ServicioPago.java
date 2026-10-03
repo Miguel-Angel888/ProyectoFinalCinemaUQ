@@ -2,10 +2,13 @@ package co.edu.uniquindio.poo.proyectofinalcinemauq.model.servicio;
 
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.exceptions.CinemaUQException;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.exceptions.CinemaUQException.*;
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.perfil.Cliente;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.tarjeta.Pago;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.tarjeta.TarjetaVirtual;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.venta.Compra;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.venta.EstadoCompra;
+
+import java.time.LocalDate;
 
 public class ServicioPago {
 
@@ -26,6 +29,10 @@ public class ServicioPago {
         Pago pago = new Pago(compra, tarjeta);
         int puntos = reglaPuntos.calcular(compra.getTotal());
         compra.registrarPago(pago, puntos);
+
+        Cliente cliente = compra.getCliente();
+        cliente.getPuntos().acumular(puntos, LocalDate.now());
+        cliente.agregarCompra(compra);
         return pago;
     }
 }

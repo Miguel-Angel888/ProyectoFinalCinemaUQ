@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 
 public class Reembolso {
 
-    //Atriburtos
+    //Atributos
     private String referencia;
     private Compra compra;
     private double porcentaje;

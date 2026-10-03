@@ -25,4 +25,8 @@ public class CinemaUQException extends Exception {
     public static class SolicitudInvalidaException extends CinemaUQException {
         public SolicitudInvalidaException(String mensaje) { super(mensaje); }
     }
+
+    public static class PuntosInsuficientesException extends CinemaUQException {
+        public PuntosInsuficientesException(String mensaje) { super(mensaje); }
+    }
 }

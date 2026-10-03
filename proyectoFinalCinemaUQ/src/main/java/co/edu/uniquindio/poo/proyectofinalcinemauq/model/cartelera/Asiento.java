@@ -8,7 +8,7 @@ public class Asiento {
     private int numero;
     private TipoAsiento tipoAsiento;
 
-    //Constructot
+    //Constructor
 
 
     public Asiento(String referencia, int numero, char fila, TipoAsiento tipoAsiento) {

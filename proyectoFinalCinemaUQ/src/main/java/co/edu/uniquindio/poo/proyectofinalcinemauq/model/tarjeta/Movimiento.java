@@ -2,8 +2,6 @@ package co.edu.uniquindio.poo.proyectofinalcinemauq.model.tarjeta;
 
 import java.time.LocalDateTime;
 
-//cambie la clase movimiento a una abstracta
-
 public abstract class Movimiento {
 
     private final String referencia;
