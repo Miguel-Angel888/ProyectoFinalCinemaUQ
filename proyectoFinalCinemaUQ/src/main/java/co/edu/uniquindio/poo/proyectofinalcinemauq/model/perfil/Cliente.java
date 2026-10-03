@@ -5,21 +5,32 @@ import co.edu.uniquindio.poo.proyectofinalcinemauq.model.venta.Compra;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class Cliente extends Usuario {
 
     //Atributos
     private TarjetaVirtual tarjetaVirtual;
-    private CuentaPuntos puntos;
-    private ArrayList<Compra> listaCompras;
+    private final CuentaPuntos puntos;
+    private final List<Compra> listaCompras;
 
     //Constructor
     public Cliente(String id, String nombre, String correo, String contrasenia, LocalDate fechaRegistro,
-                   TarjetaVirtual tarjetaVirtual, CuentaPuntos puntos, ArrayList<Compra> listaCompras) {
+                   TarjetaVirtual tarjetaVirtual) {
         super(id, nombre, correo, contrasenia, fechaRegistro);
         this.tarjetaVirtual = tarjetaVirtual;
-        this.puntos = puntos;
-        this.listaCompras = listaCompras;
+        this.puntos = new CuentaPuntos();
+        this.listaCompras = new ArrayList<>();
+    }
+
+    //operaciones
+
+    public void agregarCompra(Compra compra) {
+        if (compra == null) {
+            throw new IllegalArgumentException("La compra no puede ser nula");
+        }
+        listaCompras.add(compra);
     }
 
     //Getters y setters
@@ -36,15 +47,7 @@ public class Cliente extends Usuario {
         return puntos;
     }
 
-    public void setPuntos(CuentaPuntos puntos) {
-        this.puntos = puntos;
-    }
-
-    public ArrayList<Compra> getListaCompras() {
-        return listaCompras;
-    }
-
-    public void setListaCompras(ArrayList<Compra> listaCompras) {
-        this.listaCompras = listaCompras;
+    public List<Compra> getListaCompras() {
+        return Collections.unmodifiableList(listaCompras);
     }
 }
