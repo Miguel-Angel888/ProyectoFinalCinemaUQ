@@ -68,7 +68,7 @@
                         <id>default-cli</id>
                         <configuration>
                             <mainClass>
-                                co.edu.uniquindio.poo.proyectofinalcinemauq/co.edu.uniquindio.poo.proyectofinalcinemauq.HelloApplication
+                                co.edu.uniquindio.poo.proyectofinalcinemauq/co.edu.uniquindio.poo.proyectofinalcinemauq.CinemaApp
                             </mainClass>
                             <launcher>app</launcher>
                             <jlinkZipName>app</jlinkZipName>
