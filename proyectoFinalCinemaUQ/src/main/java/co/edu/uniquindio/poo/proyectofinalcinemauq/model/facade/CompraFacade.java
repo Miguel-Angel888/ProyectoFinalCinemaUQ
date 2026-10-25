@@ -63,6 +63,9 @@ public class CompraFacade {
             throw new CinemaUQException.CompraInvalidaException(
                     "Máximo " + MAX_ENTRADAS_POR_COMPRA + " entradas por compra");
         }
+
+        validarLimitePorFuncion(cliente, funcion, asientos.size());
+
         for (Asiento asiento : asientos) {
             if (!funcion.estaDisponible(asiento)) {
                 throw new CinemaUQException.AsientoNoDisponibleException(
@@ -94,6 +97,7 @@ public class CompraFacade {
         Cliente cliente = compra.getCliente();
         Funcion funcion = compra.getListaEntradas().get(0).getFuncion();
         validarSinCruceDeHorario(cliente, funcion);
+        validarLimitePorFuncion(cliente, funcion, compra.getListaEntradas().size());
         for (LineaCompra linea : compra.getListaLineas()) validarStock(linea);
 
         // Lista donde anotamos los asientos que logramos reservar
@@ -123,7 +127,7 @@ public class CompraFacade {
     }
 
     // Un cliente no puede tener entradas pagadas para dos funciones distintas que se crucen en el tiempo.
-// Comprar más sillas para la misma función en otra ocasión sí está permitido.
+    // Comprar más sillas para la misma función en otra ocasión sí está permitido.
     public void validarSinCruceDeHorario(Cliente cliente, Funcion funcion) throws CinemaUQException {
         for (Compra previa : cliente.getListaCompras()) {
             if (previa.getEstado() != EstadoCompra.PAGADA) continue;
@@ -136,6 +140,21 @@ public class CompraFacade {
                                     + ") y se cruza con esta función.");
                 }
             }
+        }
+    }
+
+    // Cuenta las entradas que el cliente ya pagó para esta función y valida el tope total
+    private void validarLimitePorFuncion(Cliente cliente, Funcion funcion, int nuevas) throws CinemaUQException {
+        int yaCompradas = 0;
+        for (Compra previa : cliente.getListaCompras()) {
+            if (previa.getEstado() != EstadoCompra.PAGADA) continue;
+            for (Entrada entrada : previa.getListaEntradas()) {
+                if (entrada.getFuncion() == funcion) yaCompradas++;
+            }
+        }
+        if (yaCompradas + nuevas > MAX_ENTRADAS_POR_COMPRA) {
+            throw new CinemaUQException.CompraInvalidaException(
+                    "Máximo " + MAX_ENTRADAS_POR_COMPRA + " entradas por función. Ya tienes " + yaCompradas + ".");
         }
     }
 
