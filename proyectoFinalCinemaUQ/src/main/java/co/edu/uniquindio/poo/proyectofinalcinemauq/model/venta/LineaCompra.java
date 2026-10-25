@@ -2,22 +2,22 @@ package co.edu.uniquindio.poo.proyectofinalcinemauq.model.venta;
 
 public class LineaCompra {
 
-    private final Producto producto;
+    private final ItemConfiteria item;     // puede ser un producto o un combo (Composite)
     private final int cantidad;
     private final double precioUnitario;   // precio al momento de la compra
 
-    public LineaCompra(Producto producto, int cantidad) {
-        if (producto == null || cantidad <= 0) {
-            throw new IllegalArgumentException("La línea requiere un producto y una cantidad mayor a cero");
+    public LineaCompra(ItemConfiteria item, int cantidad) {
+        if (item == null || cantidad <= 0) {
+            throw new IllegalArgumentException("La línea requiere un ítem y una cantidad mayor a cero");
         }
-        this.producto = producto;
+        this.item = item;
         this.cantidad = cantidad;
-        this.precioUnitario = producto.getPrecio();
+        this.precioUnitario = item.getPrecio();
     }
 
     public double getSubtotal() { return precioUnitario * cantidad; }
 
-    public Producto getProducto() { return producto; }
+    public ItemConfiteria getItem() { return item; }
     public int getCantidad() { return cantidad; }
     public double getPrecioUnitario() { return precioUnitario; }
 }
