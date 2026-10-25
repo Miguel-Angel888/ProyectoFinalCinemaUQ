@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.Tab?>
+<?import javafx.scene.control.TabPane?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="co.edu.uniquindio.poo.proyectofinalcinemauq.controller.TarjetaController">
+
+    <top>
+        <HBox styleClass="barra">
+            <Label text="CinemaUQ" styleClass="logo"/>
+            <Label text="Mi tarjeta virtual" styleClass="titulo"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button fx:id="btnVolver" text="← Volver" onAction="#onVolver"/>
+        </HBox>
+    </top>
+
+    <center>
+        <VBox spacing="16">
+            <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+
+            <HBox spacing="16">
+                <VBox styleClass="panel" HBox.hgrow="ALWAYS">
+                    <Label text="SALDO DISPONIBLE" styleClass="seccion"/>
+                    <Label fx:id="lblSaldo" styleClass="dinero-grande"/>
+                </VBox>
+                <VBox styleClass="panel" HBox.hgrow="ALWAYS">
+                    <Label text="NÚMERO DE TARJETA" styleClass="seccion"/>
+                    <Label fx:id="lblNumero" styleClass="titulo"/>
+                </VBox>
+                <VBox styleClass="panel" HBox.hgrow="ALWAYS">
+                    <Label text="ESTADO" styleClass="seccion"/>
+                    <Label fx:id="lblEstado" styleClass="titulo"/>
+                </VBox>
+                <VBox styleClass="panel" HBox.hgrow="ALWAYS">
+                    <Label text="PUNTOS CINEMAUQ" styleClass="seccion"/>
+                    <Label fx:id="lblPuntos" styleClass="dinero-grande"/>
+                </VBox>
+            </HBox>
+
+            <TabPane tabClosingPolicy="UNAVAILABLE" VBox.vgrow="ALWAYS">
+                <Tab text="Movimientos">
+                    <TableView fx:id="tablaMovimientos">
+                        <columns>
+                            <TableColumn fx:id="colMovFecha" text="Fecha" prefWidth="150"/>
+                            <TableColumn fx:id="colMovTipo" text="Tipo" prefWidth="110"/>
+                            <TableColumn fx:id="colMovDescripcion" text="Descripción" prefWidth="330"/>
+                            <TableColumn fx:id="colMovMonto" text="Monto" prefWidth="130"/>
+                            <TableColumn fx:id="colMovSaldo" text="Saldo resultante" prefWidth="150"/>
+                        </columns>
+                    </TableView>
+                </Tab>
+                <Tab text="Solicitar recarga">
+                    <VBox spacing="12">
+                        <padding><Insets top="14" right="4" bottom="4" left="4"/></padding>
+                        <Label wrapText="true" styleClass="subtitulo"
+                               text="Las recargas las realiza el administrador. Envía tu solicitud y aparecerá aquí cuando sea procesada."/>
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Label text="Monto"/>
+                            <TextField fx:id="txtMontoRecarga" promptText="Ej: 50000" prefWidth="180" onAction="#onSolicitarRecarga"/>
+                            <Button text="SOLICITAR RECARGA" styleClass="boton-principal" onAction="#onSolicitarRecarga"/>
+                        </HBox>
+                        <TableView fx:id="tablaSolicitudes" VBox.vgrow="ALWAYS">
+                            <columns>
+                                <TableColumn fx:id="colSolReferencia" text="Referencia" prefWidth="140"/>
+                                <TableColumn fx:id="colSolFecha" text="Fecha" prefWidth="160"/>
+                                <TableColumn fx:id="colSolMonto" text="Monto" prefWidth="140"/>
+                                <TableColumn fx:id="colSolEstado" text="Estado" prefWidth="140"/>
+                            </columns>
+                        </TableView>
+                    </VBox>
+                </Tab>
+                <Tab text="Mis puntos">
+                    <TableView fx:id="tablaPuntos">
+                        <columns>
+                            <TableColumn fx:id="colPtsObtenidos" text="Puntos obtenidos" prefWidth="140"/>
+                            <TableColumn fx:id="colPtsRestantes" text="Puntos restantes" prefWidth="140"/>
+                            <TableColumn fx:id="colPtsFecha" text="Fecha de obtención" prefWidth="160"/>
+                            <TableColumn fx:id="colPtsVence" text="Fecha de vencimiento" prefWidth="170"/>
+                            <TableColumn fx:id="colPtsEstado" text="Estado" prefWidth="120"/>
+                        </columns>
+                    </TableView>
+                </Tab>
+                <Tab text="Mis compras">
+                    <TableView fx:id="tablaCompras">
+                        <columns>
+                            <TableColumn fx:id="colCmpFecha" text="Fecha" prefWidth="140"/>
+                            <TableColumn fx:id="colCmpPelicula" text="Película" prefWidth="200"/>
+                            <TableColumn fx:id="colCmpAsientos" text="Asientos" prefWidth="160"/>
+                            <TableColumn fx:id="colCmpTotal" text="Total" prefWidth="120"/>
+                            <TableColumn fx:id="colCmpPuntos" text="Puntos" prefWidth="80"/>
+                            <TableColumn fx:id="colCmpEstado" text="Estado" prefWidth="110"/>
+                        </columns>
+                    </TableView>
+                </Tab>
+            </TabPane>
+        </VBox>
+    </center>
+</BorderPane>
