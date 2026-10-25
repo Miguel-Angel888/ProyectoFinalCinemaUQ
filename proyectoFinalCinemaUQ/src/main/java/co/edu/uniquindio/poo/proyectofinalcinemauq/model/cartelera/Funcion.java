@@ -1,6 +1,10 @@
 package co.edu.uniquindio.poo.proyectofinalcinemauq.model.cartelera;
 
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.exceptions.CinemaUQException;
+
 import java.time.LocalDateTime;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Funcion {
 
@@ -11,6 +15,7 @@ public class Funcion {
     private LocalDateTime fechaFuncion;
     private double precioBase;
     private EstadoFuncion estadoFuncion;
+    private final Set<String> asientosOcupados;   // referencias de los asientos vendidos en esta función
 
     //Constructor
 
@@ -23,8 +28,36 @@ public class Funcion {
         this.fechaFuncion = fechaFuncion;
         this.precioBase = precioBase;
         this.estadoFuncion = estadoFuncion;
+        this.asientosOcupados = new HashSet<>();
     }
 
+    public boolean estaDisponible(Asiento asiento) {
+        return !asientosOcupados.contains(asiento.getReferencia());
+    }
+
+    public void reservarAsiento(Asiento asiento) throws CinemaUQException.AsientoNoDisponibleException {
+        if (sala.buscarAsiento(asiento.getReferencia()) == null) {
+            throw new IllegalArgumentException("El asiento " + asiento.getReferencia() + " no pertenece a la sala");
+        }
+        boolean seAgrego = asientosOcupados.add(asiento.getReferencia());
+        if (!seAgrego) {
+            throw new CinemaUQException.AsientoNoDisponibleException(
+                    "El asiento " + asiento.getReferencia() + " ya está ocupado en esta función");
+        }
+    }
+
+    public void liberarAsiento(Asiento asiento) {
+        asientosOcupados.remove(asiento.getReferencia());
+    }
+
+    // Se puede vender mientras esté programada y no haya empezado
+    public boolean estaProgramada() {
+        return estadoFuncion == EstadoFuncion.PROGRAMADA && fechaFuncion.isAfter(LocalDateTime.now());
+    }
+
+    public int getCantidadDisponibles() {
+        return sala.getCapacidad() - asientosOcupados.size();
+    }
 
     //Getters y setters
 
