@@ -9,11 +9,11 @@ public class Pago {
 
     private final String referencia;
     private final Compra compra;
-    private final TarjetaVirtual tarjeta;
+    private final MedioPago tarjeta;   // tarjeta usada: el reembolso debe volver a ella
     private final double cantidad;
     private final LocalDateTime fechaPago;
 
-    public Pago(Compra compra, TarjetaVirtual tarjeta) {
+    public Pago(Compra compra, MedioPago tarjeta) {
         if (compra == null || tarjeta == null) {
             throw new IllegalArgumentException("El pago requiere una compra y una tarjeta");
         }
@@ -26,7 +26,7 @@ public class Pago {
 
     public String getReferencia() { return referencia; }
     public Compra getCompra() { return compra; }
-    public TarjetaVirtual getTarjeta() { return tarjeta; }
+    public MedioPago getTarjeta() { return tarjeta; }
     public double getCantidad() { return cantidad; }
     public LocalDateTime getFechaPago() { return fechaPago; }
 }
