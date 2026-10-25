@@ -42,6 +42,10 @@ public class CinemaUQException extends Exception {
         public FuncionNoDisponibleException(String mensaje) { super(mensaje); }
     }
 
+    public static class CruceHorarioException extends CinemaUQException {
+        public CruceHorarioException(String mensaje) { super(mensaje); }
+    }
+
     public static class AutenticacionException extends CinemaUQException {
         public AutenticacionException(String mensaje) { super(mensaje); }
     }

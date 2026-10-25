@@ -83,6 +83,8 @@ public class DatosIniciales {
         agregarFuncion(cine, "F5", intensamente, sala2, hoy.plusDays(1).atTime(15, 0), 12000, "A5", "A6", "A7");
         agregarFuncion(cine, "F6", intensamente, sala1, proximoMartes.atTime(11, 0), 12000);
         agregarFuncion(cine, "F7", avatar, sala1, hoy.plusDays(3).atTime(18, 0), 17000, "H1", "H2", "H3");
+        // Función de prueba: se cruza con F1 (Interestelar, mañana 7:15 p. m. a 10:04 p. m.)
+        agregarFuncion(cine, "F8", intensamente, sala2, hoy.plusDays(1).atTime(20, 0), 12000);
     }
 
     // Crea los asientos de la sala por filas (A, B, C...) y números

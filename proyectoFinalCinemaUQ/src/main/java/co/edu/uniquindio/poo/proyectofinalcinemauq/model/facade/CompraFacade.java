@@ -53,6 +53,9 @@ public class CompraFacade {
         if (funcion == null || !funcion.estaProgramada()) {
             throw new CinemaUQException.FuncionNoDisponibleException("La función no está disponible para la venta");
         }
+
+        validarSinCruceDeHorario(cliente, funcion);
+
         if (asientos == null || asientos.isEmpty()) {
             throw new CinemaUQException.CompraInvalidaException("Selecciona al menos un asiento");
         }
@@ -90,6 +93,7 @@ public class CompraFacade {
     public Pago confirmar(Compra compra) throws CinemaUQException {
         Cliente cliente = compra.getCliente();
         Funcion funcion = compra.getListaEntradas().get(0).getFuncion();
+        validarSinCruceDeHorario(cliente, funcion);
         for (LineaCompra linea : compra.getListaLineas()) validarStock(linea);
 
         // Lista donde anotamos los asientos que logramos reservar
@@ -115,6 +119,23 @@ public class CompraFacade {
                 funcion.liberarAsiento(asiento);
             }
             throw e;
+        }
+    }
+
+    // Un cliente no puede tener entradas pagadas para dos funciones distintas que se crucen en el tiempo.
+// Comprar más sillas para la misma función en otra ocasión sí está permitido.
+    public void validarSinCruceDeHorario(Cliente cliente, Funcion funcion) throws CinemaUQException {
+        for (Compra previa : cliente.getListaCompras()) {
+            if (previa.getEstado() != EstadoCompra.PAGADA) continue;
+            for (Entrada entrada : previa.getListaEntradas()) {
+                Funcion otra = entrada.getFuncion();
+                if (otra != funcion && otra.seCruzaCon(funcion)) {
+                    throw new CinemaUQException.CruceHorarioException(
+                            "Ya tienes entradas para \"" + otra.getPelicula().getTitulo() + "\" ("
+                                    + otra.getFechaFuncion().toLocalTime() + " - " + otra.getFechaFin().toLocalTime()
+                                    + ") y se cruza con esta función.");
+                }
+            }
         }
     }
 
