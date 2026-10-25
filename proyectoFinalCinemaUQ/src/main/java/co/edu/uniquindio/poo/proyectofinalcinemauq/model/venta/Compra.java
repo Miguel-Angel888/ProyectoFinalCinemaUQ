@@ -2,6 +2,10 @@ package co.edu.uniquindio.poo.proyectofinalcinemauq.model.venta;
 
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.exceptions.CinemaUQException.CompraInvalidaException;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.perfil.Cliente;
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.promocion.Cotizacion;
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.promocion.CotizacionBase;
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.promocion.DescuentoAplicado;
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.promocion.Promocion;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.tarjeta.Pago;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.tarjeta.Reembolso;
 
@@ -23,6 +27,7 @@ public class Compra {
     private final double subtotal;
     private final double descuento;
     private final double total;
+    private final List<DescuentoAplicado> descuentosAplicados;
     private EstadoCompra estado;
     private int puntosGanados;
     private Pago pago;
@@ -38,8 +43,10 @@ public class Compra {
         this.estado = EstadoCompra.PENDIENTE;
 
         this.subtotal = calcularSubtotal();
-        this.descuento = calcularDescuento();
-        this.total = Math.max(0, subtotal - descuento);
+        Cotizacion cotizacion = aplicarPromociones();
+        this.total = cotizacion.calcularTotal();
+        this.descuento = subtotal - total;
+        this.descuentosAplicados = cotizacion.getDescuentosAplicados();
     }
 
     // calculos
@@ -50,10 +57,15 @@ public class Compra {
         return suma;
     }
 
-    private double calcularDescuento() {
-        double suma = 0;
-        for (Promocion p : promociones) suma += p.aplicar(subtotal);
-        return Math.min(suma, subtotal);   // el descuento nunca supera el subtotal
+    // Decorator: cada promoción aplicable envuelve la cotización anterior
+    private Cotizacion aplicarPromociones() {
+        Cotizacion cotizacion = new CotizacionBase(subtotal);
+        for (Promocion p : promociones) {
+            if (p.esAplicable(listaEntradas, subtotal)) {
+                cotizacion = p.aplicar(cotizacion);
+            }
+        }
+        return cotizacion;
     }
 
     // registros
@@ -86,6 +98,7 @@ public class Compra {
     public List<Promocion> getPromociones() { return Collections.unmodifiableList(promociones); }
     public double getSubtotal() { return subtotal; }
     public double getDescuento() { return descuento; }
+    public List<DescuentoAplicado> getDescuentosAplicados() { return Collections.unmodifiableList(descuentosAplicados); }
     public double getTotal() { return total; }
     public EstadoCompra getEstado() { return estado; }
     public int getPuntosGanados() { return puntosGanados; }

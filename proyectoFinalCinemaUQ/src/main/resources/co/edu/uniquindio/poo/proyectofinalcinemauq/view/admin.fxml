@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TableColumn?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="co.edu.uniquindio.poo.proyectofinalcinemauq.controller.AdminController">
+
+    <top>
+        <HBox styleClass="barra">
+            <Label text="CinemaUQ" styleClass="logo"/>
+            <Label text="Panel del administrador" styleClass="titulo"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Label fx:id="lblAdmin"/>
+            <Button text="Cerrar sesión" styleClass="boton-secundario" onAction="#onCerrarSesion"/>
+        </HBox>
+    </top>
+
+    <center>
+        <VBox spacing="16">
+            <padding><Insets top="20" right="20" bottom="20" left="20"/></padding>
+
+            <VBox styleClass="panel" VBox.vgrow="ALWAYS">
+                <Label text="SOLICITUDES DE RECARGA PENDIENTES" styleClass="seccion"/>
+                <TableView fx:id="tablaSolicitudes" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="colSolCliente" text="Cliente" prefWidth="200"/>
+                        <TableColumn fx:id="colSolTarjeta" text="Tarjeta" prefWidth="120"/>
+                        <TableColumn fx:id="colSolSaldo" text="Saldo actual" prefWidth="140"/>
+                        <TableColumn fx:id="colSolMonto" text="Monto solicitado" prefWidth="150"/>
+                        <TableColumn fx:id="colSolFecha" text="Fecha" prefWidth="160"/>
+                    </columns>
+                </TableView>
+                <HBox spacing="10" alignment="CENTER_RIGHT">
+                    <Button text="Rechazar" styleClass="boton-secundario" onAction="#onRechazar"/>
+                    <Button text="APROBAR Y RECARGAR" styleClass="boton-principal" onAction="#onAprobar"/>
+                </HBox>
+            </VBox>
+
+            <VBox styleClass="panel" VBox.vgrow="ALWAYS">
+                <Label text="CLIENTES" styleClass="seccion"/>
+                <TableView fx:id="tablaClientes" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="colCliNombre" text="Nombre" prefWidth="200"/>
+                        <TableColumn fx:id="colCliCorreo" text="Correo" prefWidth="220"/>
+                        <TableColumn fx:id="colCliTarjeta" text="Tarjeta" prefWidth="120"/>
+                        <TableColumn fx:id="colCliSaldo" text="Saldo" prefWidth="140"/>
+                        <TableColumn fx:id="colCliPuntos" text="Puntos vigentes" prefWidth="130"/>
+                        <TableColumn fx:id="colCliCompras" text="Compras" prefWidth="90"/>
+                    </columns>
+                </TableView>
+            </VBox>
+        </VBox>
+    </center>
+</BorderPane>

@@ -5,6 +5,7 @@ module co.edu.uniquindio.poo.proyectofinalcinemauq {
 
 
     opens co.edu.uniquindio.poo.proyectofinalcinemauq to javafx.fxml;
+    opens co.edu.uniquindio.poo.proyectofinalcinemauq.controller to javafx.fxml;
     exports co.edu.uniquindio.poo.proyectofinalcinemauq;
     exports co.edu.uniquindio.poo.proyectofinalcinemauq.model.servicio;
     exports co.edu.uniquindio.poo.proyectofinalcinemauq.model.exceptions;

@@ -5,9 +5,10 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class TarjetaVirtual {
+// PATRÓN PROXY - Sujeto real
+public class TarjetaVirtual implements MedioPago {
 
-    //Artributos
+    //Atributos
     private String numeroTarjeta;
     private double saldo;
     private EstadoTarjeta estadoTarjeta;

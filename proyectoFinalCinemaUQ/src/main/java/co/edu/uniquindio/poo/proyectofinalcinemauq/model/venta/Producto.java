@@ -1,6 +1,9 @@
 package co.edu.uniquindio.poo.proyectofinalcinemauq.model.venta;
 
-public class Producto {
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.exceptions.CinemaUQException.StockInsuficienteException;
+
+// PATRÓN COMPOSITE - Hoja
+public class Producto implements ItemConfiteria {
 
     //Atributos
     private String referencia;
@@ -23,8 +26,29 @@ public class Producto {
         this.puntosRedencion = puntosRedencion;
     }
 
+    //Composite
+
+    @Override
+    public String getDescripcion() {
+        return categoriaProducto.name().charAt(0) + categoriaProducto.name().substring(1).toLowerCase();
+    }
+
+    @Override
+    public boolean hayStock(int cantidad) {
+        return stock >= cantidad;
+    }
+
+    @Override
+    public void descontarStock(int cantidad) throws StockInsuficienteException {
+        if (!hayStock(cantidad)) {
+            throw new StockInsuficienteException("No hay suficiente stock de " + nombre + ". Disponible: " + stock);
+        }
+        stock -= cantidad;
+    }
+
     //Getters y setters
 
+    @Override
     public String getReferencia() {
         return referencia;
     }
@@ -33,6 +57,7 @@ public class Producto {
         this.referencia = referencia;
     }
 
+    @Override
     public String getNombre() {
         return nombre;
     }
@@ -49,6 +74,7 @@ public class Producto {
         this.categoriaProducto = categoriaProducto;
     }
 
+    @Override
     public double getPrecio() {
         return precio;
     }
@@ -65,11 +91,17 @@ public class Producto {
         this.stock = stock;
     }
 
+    @Override
     public int getPuntosRedencion() {
         return puntosRedencion;
     }
 
     public void setPuntosRedencion(int puntosRedencion) {
         this.puntosRedencion = puntosRedencion;
+    }
+
+    @Override
+    public String toString() {
+        return nombre;
     }
 }

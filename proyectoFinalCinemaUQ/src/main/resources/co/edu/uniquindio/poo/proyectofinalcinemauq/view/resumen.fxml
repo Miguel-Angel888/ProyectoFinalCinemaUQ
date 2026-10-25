@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="co.edu.uniquindio.poo.proyectofinalcinemauq.controller.ResumenController">
+
+    <top>
+        <HBox styleClass="barra">
+            <Label text="CinemaUQ" styleClass="logo"/>
+            <Label text="Resumen y pago" styleClass="titulo"/>
+        </HBox>
+    </top>
+
+    <center>
+        <VBox styleClass="panel">
+            <BorderPane.margin><Insets top="20" right="10" bottom="20" left="20"/></BorderPane.margin>
+            <Label text="DETALLE DE LA COMPRA" styleClass="seccion"/>
+            <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS">
+                <VBox fx:id="contenedorDetalle" spacing="8">
+                    <padding><Insets top="6" right="12" bottom="6" left="4"/></padding>
+                </VBox>
+            </ScrollPane>
+        </VBox>
+    </center>
+
+    <right>
+        <VBox styleClass="panel" prefWidth="340">
+            <BorderPane.margin><Insets top="20" right="20" bottom="20" left="10"/></BorderPane.margin>
+            <Label text="TARJETA VIRTUAL" styleClass="seccion"/>
+            <Label fx:id="lblNumeroTarjeta" styleClass="item-titulo"/>
+            <HBox>
+                <Label text="Saldo actual"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label fx:id="lblSaldoActual"/>
+            </HBox>
+            <HBox>
+                <Label text="Saldo después del pago"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label fx:id="lblSaldoDespues"/>
+            </HBox>
+            <Separator/>
+            <Label text="PUNTOS CINEMAUQ" styleClass="seccion"/>
+            <Label fx:id="lblPuntos" wrapText="true"/>
+            <Separator/>
+            <HBox alignment="CENTER_LEFT">
+                <Label text="TOTAL" styleClass="seccion"/>
+                <Region HBox.hgrow="ALWAYS"/>
+                <Label fx:id="lblTotal" styleClass="dinero-grande"/>
+            </HBox>
+            <Region VBox.vgrow="ALWAYS"/>
+            <Button fx:id="btnPagar" text="PAGAR CON TARJETA" styleClass="boton-principal" maxWidth="Infinity" onAction="#onPagar"/>
+            <Button text="← VOLVER A CONFITERÍA" styleClass="boton-secundario" maxWidth="Infinity" onAction="#onVolver"/>
+            <Button text="Cancelar compra" styleClass="boton-secundario" maxWidth="Infinity" onAction="#onCancelar"/>
+        </VBox>
+    </right>
+</BorderPane>
