@@ -55,6 +55,16 @@ public class Funcion {
         return estadoFuncion == EstadoFuncion.PROGRAMADA && fechaFuncion.isAfter(LocalDateTime.now());
     }
 
+    // Hora en que termina la función según la duración de la película
+    public LocalDateTime getFechaFin() {
+        return fechaFuncion.plusMinutes(pelicula.getDuracionMinutos());
+    }
+
+    // Dos funciones se cruzan si una empieza antes de que la otra termine
+    public boolean seCruzaCon(Funcion otra) {
+        return fechaFuncion.isBefore(otra.getFechaFin()) && otra.fechaFuncion.isBefore(getFechaFin());
+    }
+
     public int getCantidadDisponibles() {
         return sala.getCapacidad() - asientosOcupados.size();
     }

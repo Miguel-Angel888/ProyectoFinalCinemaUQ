@@ -152,6 +152,11 @@ public class CinemaFacade {
         return compraFacade.cotizar(getClienteActual(), funcion, asientos, tipo, productos, cine.getPromociones());
     }
 
+    // Permite avisar al cliente desde la cartelera, antes de elegir asientos
+    public void validarHorarioDisponible(Funcion funcion) throws CinemaUQException {
+        compraFacade.validarSinCruceDeHorario(getClienteActual(), funcion);
+    }
+
     public Pago pagarCompra(Compra compra) throws CinemaUQException {
         if (compra.getCliente() != getClienteActual()) {
             throw new CompraInvalidaException("La compra no pertenece al cliente en sesión");

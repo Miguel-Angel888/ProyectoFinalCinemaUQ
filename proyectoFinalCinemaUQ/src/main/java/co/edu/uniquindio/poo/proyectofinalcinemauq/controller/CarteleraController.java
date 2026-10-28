@@ -1,5 +1,6 @@
 package co.edu.uniquindio.poo.proyectofinalcinemauq.controller;
 
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.exceptions.CinemaUQException;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.cartelera.Funcion;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.cartelera.Pelicula;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.perfil.Cliente;
@@ -93,6 +94,12 @@ public class CarteleraController {
         Funcion funcion = listaFunciones.getSelectionModel().getSelectedItem();
         if (funcion == null) {
             Alertas.error("Selecciona una función", "Elige el horario que quieres ver.");
+            return;
+        }
+        try {
+            facade.validarHorarioDisponible(funcion);
+        } catch (CinemaUQException e) {
+            Alertas.error("Horario no disponible", e.getMessage());
             return;
         }
         SesionCompra.get().iniciar(funcion);
