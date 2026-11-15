@@ -1,5 +1,8 @@
 package co.edu.uniquindio.poo.proyectofinalcinemauq.model.servicio;
 
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.eventos.EventoCine;
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.eventos.PublicadorEventos;
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.eventos.TipoEvento;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.exceptions.CinemaUQException;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.exceptions.CinemaUQException.StockInsuficienteException;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.perfil.Cliente;
@@ -7,7 +10,6 @@ import co.edu.uniquindio.poo.proyectofinalcinemauq.model.recompensa.Canje;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.recompensa.Recompensa;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.recompensa.ReglaCostoRedencion;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.recompensa.TipoRecompensa;
-import co.edu.uniquindio.poo.proyectofinalcinemauq.model.reporte.Notificacion;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.venta.ItemConfiteria;
 
 import java.time.LocalDate;
@@ -21,9 +23,11 @@ public class ServicioCanje {
     private static final double[] VALORES_BONO_ENTRADA = {15000, 20000};
 
     private final ReglaCostoRedencion reglaCosto;
+    private final PublicadorEventos eventos;
 
     public ServicioCanje(ReglaCostoRedencion reglaCosto) {
         this.reglaCosto = reglaCosto;
+        this.eventos = eventos;
     }
 
     // Se arma cada vez que se pide, así refleja cambios en la confitería
@@ -57,7 +61,7 @@ public class ServicioCanje {
         if (item != null) item.descontarStock(1);
         Canje canje = new Canje(cliente, recompensa);
         cliente.agregarCanje(canje);
-        cliente.agregarNotificacion(new Notificacion(cliente, "Canjeaste " + recompensa.getNombre()
+        eventos.publicar(new EventoCine(TipoEvento.CANJE_REALIZADO, cliente, "Canjeaste " + recompensa.getNombre()
                 + " por " + recompensa.getPuntosRequeridos() + " puntos. Código: " + canje.getCodigo()));
         return canje;
     }

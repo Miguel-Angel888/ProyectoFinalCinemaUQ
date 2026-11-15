@@ -2,10 +2,12 @@ package co.edu.uniquindio.poo.proyectofinalcinemauq.model.facade;
 
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.cartelera.Asiento;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.cartelera.Funcion;
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.eventos.EventoCine;
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.eventos.PublicadorEventos;
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.eventos.TipoEvento;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.exceptions.CinemaUQException;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.perfil.Cliente;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.promocion.Promocion;
-import co.edu.uniquindio.poo.proyectofinalcinemauq.model.reporte.Notificacion;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.servicio.ServicioPago;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.tarjeta.Pago;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.tarjeta.TarjetaProxy;
@@ -29,10 +31,12 @@ public class CompraFacade {
     public static final int MAX_ENTRADAS_POR_COMPRA = 10;
 
     private final ServicioPago servicioPago;
+    private final PublicadorEventos eventos;
     private final Map<String, TarjetaProxy> proxiesTarjeta = new HashMap<>();
 
     public CompraFacade(ServicioPago servicioPago) {
         this.servicioPago = servicioPago;
+        this.eventos = eventos;
     }
 
     // Compra completa en un solo paso: arma la compra y la paga
@@ -109,7 +113,7 @@ public class CompraFacade {
             for (LineaCompra linea : compra.getListaLineas()) {
                 linea.getItem().descontarStock(linea.getCantidad());
             }
-            cliente.agregarNotificacion(new Notificacion(cliente,
+            eventos.publicar(new EventoCine(TipoEvento.COMPRA_PAGADA, cliente,
                     "Compra " + compra.getId() + " realizada con éxito. Total: $" + compra.getTotal()));
             return pago;
 
