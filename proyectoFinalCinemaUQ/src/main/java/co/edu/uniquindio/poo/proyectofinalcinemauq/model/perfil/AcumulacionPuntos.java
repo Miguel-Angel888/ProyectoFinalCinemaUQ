@@ -5,6 +5,8 @@ import java.time.LocalDate;
 //cada acumulacion guarda su fecha, porque los puntos vencen un año despues de obtenidos
 public class AcumulacionPuntos {
 
+    public static final int MESES_VIGENCIA = 12;   // para cambiar la vigencia solo se toca este valor
+
     private final int puntosObtenidos;
     private final LocalDate fechaObtencion;
     private final LocalDate fechaVencimiento;
@@ -16,7 +18,7 @@ public class AcumulacionPuntos {
         }
         this.puntosObtenidos = puntosObtenidos;
         this.fechaObtencion = fechaObtencion;
-        this.fechaVencimiento = fechaObtencion.plusYears(1);
+        this.fechaVencimiento = fechaObtencion.plusMonths(MESES_VIGENCIA);
         this.puntosDisponibles = puntosObtenidos;
     }
 

@@ -11,7 +11,13 @@ import co.edu.uniquindio.poo.proyectofinalcinemauq.model.perfil.Administrador;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.perfil.Cliente;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.perfil.Usuario;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.promocion.Promocion;
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.promocion.PromocionBonoEntrada;
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.recompensa.Canje;
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.recompensa.Recompensa;
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.recompensa.ReglaCostoPorValor;
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.recompensa.TipoRecompensa;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.servicio.ReglaPuntosPorMonto;
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.servicio.ServicioCanje;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.servicio.ServicioPago;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.tarjeta.EstadoSolicitud;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.tarjeta.Pago;
@@ -42,6 +48,7 @@ public class CinemaFacade {
 
     private final Cine cine;
     private final ServicioPago servicioPago;
+    private final ServicioCanje servicioCanje;
     private final CompraFacade compraFacade;
     private Usuario usuarioActual;
 
@@ -49,6 +56,7 @@ public class CinemaFacade {
         this.cine = new Cine("CinemaUQ");
         DatosIniciales.cargar(cine);
         this.servicioPago = new ServicioPago(new ReglaPuntosPorMonto());
+        this.servicioCanje = new ServicioCanje(new ReglaCostoPorValor());
         this.compraFacade = new CompraFacade(servicioPago);
     }
 
@@ -145,11 +153,26 @@ public class CinemaFacade {
 
     public Compra prepararCompra(Funcion funcion, List<Asiento> asientos, TipoEntrada tipo,
                                  Map<ItemConfiteria, Integer> confiteria) throws CinemaUQException {
+        return prepararCompra(funcion, asientos, tipo, confiteria, null);
+    }
+
+    // Igual que la anterior, pero el cliente puede usar un bono de entrada que canjeó con puntos
+    public Compra prepararCompra(Funcion funcion, List<Asiento> asientos, TipoEntrada tipo,
+                                 Map<ItemConfiteria, Integer> confiteria, Canje bono) throws CinemaUQException {
+        Cliente cliente = getClienteActual();
         List<LineaCompra> productos = new ArrayList<>();
         for (Map.Entry<ItemConfiteria, Integer> e : confiteria.entrySet()) {
             productos.add(new LineaCompra(e.getKey(), e.getValue()));
         }
-        return compraFacade.cotizar(getClienteActual(), funcion, asientos, tipo, productos, cine.getPromociones());
+        List<Promocion> promociones = new ArrayList<>(cine.getPromociones());
+        if (bono != null) {
+            if (!cliente.getListaCanjes().contains(bono)
+                    || bono.getRecompensa().getTipo() != TipoRecompensa.ENTRADA || !bono.estaDisponible()) {
+                throw new CompraInvalidaException("El bono seleccionado no está disponible");
+            }
+            promociones.add(new PromocionBonoEntrada(bono, calcularPrecioEntrada(funcion, tipo)));
+        }
+        return compraFacade.cotizar(cliente, funcion, asientos, tipo, productos, promociones);
     }
 
     // Permite avisar al cliente desde la cartelera, antes de elegir asientos
@@ -162,6 +185,10 @@ public class CinemaFacade {
             throw new CompraInvalidaException("La compra no pertenece al cliente en sesión");
         }
         Pago pago = compraFacade.confirmar(compra);
+        // El bono se gasta solo cuando el pago salió bien
+        for (Promocion p : compra.getPromociones()) {
+            if (p instanceof PromocionBonoEntrada bono) bono.getBono().marcarUsado();
+        }
         cine.getCompras().add(compra);
         return pago;
     }
@@ -178,6 +205,35 @@ public class CinemaFacade {
 
     public int getPuntosDisponibles(Cliente cliente) {
         return cliente.getPuntos().getPuntosDisponibles(LocalDate.now());
+    }
+
+    public int getPuntosPorVencer(Cliente cliente, int dias) {
+        return cliente.getPuntos().getPuntosPorVencer(LocalDate.now(), dias);
+    }
+
+    // ---------------- Recompensas y canje de puntos ----------------
+
+    public List<Recompensa> getCatalogoRecompensas() {
+        return servicioCanje.armarCatalogo(cine.getConfiteria());
+    }
+
+    public Canje canjearPuntos(Recompensa recompensa) throws CinemaUQException {
+        return servicioCanje.canjear(getClienteActual(), recompensa);
+    }
+
+    // Bonos de entrada canjeados que todavía no se han gastado
+    public List<Canje> getBonosEntradaDisponibles(Cliente cliente) {
+        List<Canje> resultado = new ArrayList<>();
+        for (Canje c : cliente.getListaCanjes()) {
+            if (c.getRecompensa().getTipo() == TipoRecompensa.ENTRADA && c.estaDisponible()) resultado.add(c);
+        }
+        return resultado;
+    }
+
+    // El personal de confitería marca el vale como entregado
+    public void marcarCanjeUsado(Canje canje) throws CinemaUQException {
+        validarAdministrador();
+        canje.marcarUsado();
     }
 
     public SolicitudRecarga solicitarRecarga(double monto) throws CinemaUQException {

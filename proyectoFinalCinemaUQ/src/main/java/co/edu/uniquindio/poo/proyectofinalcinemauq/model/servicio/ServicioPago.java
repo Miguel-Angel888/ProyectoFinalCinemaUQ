@@ -25,7 +25,10 @@ public class ServicioPago {
             throw new CompraInvalidaException("Solo se puede pagar una compra pendiente");
         }
 
-        tarjeta.debitar(compra.getTotal(), "Compra " + compra.getId());
+        // Un bono de entrada puede dejar el total en $0: en ese caso no hay nada que cobrar
+        if (compra.getTotal() > 0) {
+            tarjeta.debitar(compra.getTotal(), "Compra " + compra.getId());
+        }
 
         Pago pago = new Pago(compra, tarjeta);
         int puntos = reglaPuntos.calcular(compra.getTotal());

@@ -91,6 +91,32 @@
                         </columns>
                     </TableView>
                 </Tab>
+                <Tab text="Canjear puntos">
+                    <VBox spacing="12">
+                        <padding><Insets top="14" right="4" bottom="4" left="4"/></padding>
+                        <Label fx:id="lblAvisoPuntos" wrapText="true" styleClass="subtitulo"/>
+                        <TableView fx:id="tablaRecompensas" VBox.vgrow="ALWAYS">
+                            <columns>
+                                <TableColumn fx:id="colRecNombre" text="Recompensa" prefWidth="260"/>
+                                <TableColumn fx:id="colRecTipo" text="Tipo" prefWidth="130"/>
+                                <TableColumn fx:id="colRecPuntos" text="Puntos requeridos" prefWidth="160"/>
+                            </columns>
+                        </TableView>
+                        <HBox spacing="10" alignment="CENTER_LEFT">
+                            <Button text="CANJEAR SELECCIONADA" styleClass="boton-principal" onAction="#onCanjear"/>
+                        </HBox>
+                        <Label text="MIS CANJES" styleClass="seccion"/>
+                        <TableView fx:id="tablaCanjes" prefHeight="170">
+                            <columns>
+                                <TableColumn fx:id="colCjCodigo" text="Código" prefWidth="130"/>
+                                <TableColumn fx:id="colCjRecompensa" text="Recompensa" prefWidth="240"/>
+                                <TableColumn fx:id="colCjPuntos" text="Puntos usados" prefWidth="120"/>
+                                <TableColumn fx:id="colCjFecha" text="Fecha" prefWidth="150"/>
+                                <TableColumn fx:id="colCjEstado" text="Estado" prefWidth="110"/>
+                            </columns>
+                        </TableView>
+                    </VBox>
+                </Tab>
                 <Tab text="Mis compras">
                     <TableView fx:id="tablaCompras">
                         <columns>

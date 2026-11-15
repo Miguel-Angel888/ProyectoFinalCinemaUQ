@@ -4,6 +4,8 @@ import co.edu.uniquindio.poo.proyectofinalcinemauq.model.exceptions.CinemaUQExce
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.perfil.AcumulacionPuntos;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.perfil.Cliente;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.facade.CinemaFacade;
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.recompensa.Canje;
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.recompensa.Recompensa;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.tarjeta.Movimiento;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.tarjeta.SolicitudRecarga;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.tarjeta.TarjetaVirtual;
@@ -53,6 +55,19 @@ public class TarjetaController {
     @FXML private TableColumn<AcumulacionPuntos, String> colPtsVence;
     @FXML private TableColumn<AcumulacionPuntos, String> colPtsEstado;
 
+    @FXML private Label lblAvisoPuntos;
+    @FXML private TableView<Recompensa> tablaRecompensas;
+    @FXML private TableColumn<Recompensa, String> colRecNombre;
+    @FXML private TableColumn<Recompensa, String> colRecTipo;
+    @FXML private TableColumn<Recompensa, String> colRecPuntos;
+
+    @FXML private TableView<Canje> tablaCanjes;
+    @FXML private TableColumn<Canje, String> colCjCodigo;
+    @FXML private TableColumn<Canje, String> colCjRecompensa;
+    @FXML private TableColumn<Canje, String> colCjPuntos;
+    @FXML private TableColumn<Canje, String> colCjFecha;
+    @FXML private TableColumn<Canje, String> colCjEstado;
+
     @FXML private TableView<Compra> tablaCompras;
     @FXML private TableColumn<Compra, String> colCmpFecha;
     @FXML private TableColumn<Compra, String> colCmpPelicula;
@@ -94,6 +109,18 @@ public class TarjetaController {
                 : c.getValue().getPuntosDisponibles() == 0 ? "Usado" : "Vigente"));
         tablaPuntos.setPlaceholder(new Label("Aún no has acumulado puntos"));
 
+        colRecNombre.setCellValueFactory(c -> texto(c.getValue().getNombre()));
+        colRecTipo.setCellValueFactory(c -> texto(c.getValue().getTipo().toString()));
+        colRecPuntos.setCellValueFactory(c -> texto(String.valueOf(c.getValue().getPuntosRequeridos())));
+        tablaRecompensas.setPlaceholder(new Label("No hay recompensas disponibles"));
+
+        colCjCodigo.setCellValueFactory(c -> texto(c.getValue().getCodigo()));
+        colCjRecompensa.setCellValueFactory(c -> texto(c.getValue().getRecompensa().getNombre()));
+        colCjPuntos.setCellValueFactory(c -> texto(String.valueOf(c.getValue().getPuntosUsados())));
+        colCjFecha.setCellValueFactory(c -> texto(Formato.fechaHora(c.getValue().getFecha())));
+        colCjEstado.setCellValueFactory(c -> texto(c.getValue().getEstado().name()));
+        tablaCanjes.setPlaceholder(new Label("Aún no has canjeado puntos"));
+
         colCmpFecha.setCellValueFactory(c -> texto(Formato.fechaHora(c.getValue().getFecha())));
         colCmpPelicula.setCellValueFactory(c -> texto(c.getValue().getListaEntradas().get(0).getFuncion().getPelicula().getTitulo()));
         colCmpAsientos.setCellValueFactory(c -> {
@@ -127,6 +154,15 @@ public class TarjetaController {
 
         tablaPuntos.setItems(FXCollections.observableArrayList(cliente.getPuntos().getListaAcumulaciones()));
 
+        int porVencer = facade.getPuntosPorVencer(cliente, 30);
+        lblAvisoPuntos.setText(porVencer > 0
+                ? "Tienes " + porVencer + " puntos que vencen en los próximos 30 días. ¡Úsalos pronto!"
+                : "Tus puntos duran " + AcumulacionPuntos.MESES_VIGENCIA + " meses. Al canjear se usan primero los que vencen antes.");
+        tablaRecompensas.setItems(FXCollections.observableArrayList(facade.getCatalogoRecompensas()));
+        List<Canje> canjes = new ArrayList<>(cliente.getListaCanjes());
+        Collections.reverse(canjes);
+        tablaCanjes.setItems(FXCollections.observableArrayList(canjes));
+
         List<Compra> compras = new ArrayList<>(cliente.getListaCompras());
         Collections.reverse(compras);
         tablaCompras.setItems(FXCollections.observableArrayList(compras));
@@ -149,6 +185,26 @@ public class TarjetaController {
             refrescar();
         } catch (CinemaUQException e) {
             Alertas.error("No se pudo solicitar la recarga", e.getMessage());
+        }
+    }
+
+    @FXML
+    private void onCanjear() {
+        Recompensa recompensa = tablaRecompensas.getSelectionModel().getSelectedItem();
+        if (recompensa == null) {
+            Alertas.error("Selecciona una recompensa", "Elige en la tabla lo que quieres canjear.");
+            return;
+        }
+        if (!Alertas.confirmar("Confirmar canje", "¿Canjear " + recompensa.getNombre() + " por "
+                + recompensa.getPuntosRequeridos() + " puntos?")) {
+            return;
+        }
+        try {
+            Canje canje = facade.canjearPuntos(recompensa);
+            Alertas.info("¡Canje exitoso!", "Canjeaste " + recompensa.getNombre() + ".\nCódigo: " + canje.getCodigo());
+            refrescar();
+        } catch (CinemaUQException e) {
+            Alertas.error("No se pudo canjear", e.getMessage());
         }
     }
 

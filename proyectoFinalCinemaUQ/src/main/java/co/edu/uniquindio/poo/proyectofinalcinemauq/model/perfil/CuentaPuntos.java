@@ -32,6 +32,16 @@ public class CuentaPuntos {
         return total;
     }
 
+    //puntos vigentes que se vencen dentro de los proximos "dias" dias (para avisarle al cliente)
+    public int getPuntosPorVencer(LocalDate fecha, int dias) {
+        LocalDate limite = fecha.plusDays(dias);
+        int total = 0;
+        for (AcumulacionPuntos a : listaAcumulaciones) {
+            if (!a.estaVencida(fecha) && a.estaVencida(limite)) total += a.getPuntosDisponibles();
+        }
+        return total;
+    }
+
     //se usan primero los puntos que estan mas cerca de vencer
     public void redimir(int puntos, LocalDate fecha) throws CinemaUQException.PuntosInsuficientesException {
         if (puntos <= 0) {

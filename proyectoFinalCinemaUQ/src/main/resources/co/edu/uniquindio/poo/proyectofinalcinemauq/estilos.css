@@ -162,19 +162,19 @@
 .leyenda-accesible { -fx-background-color: #1f5f8b; }
 
 .cuadroAsientos {
--fx-text-fill: #48c;
--fx-font-size: 24px;
+    -fx-text-fill: #48c;
+    -fx-font-size: 24px;
 
 }
 .cuadroAsientos:hover{
--fx-font-size: 32px;
--fx-background-color: #000;
+    -fx-font-size: 32px;
+    -fx-background-color: #000;
 
 
 }
 
 .organizadorElementos {
--fx-opacity: 1;
--fx-background-color: #26a;
+    -fx-opacity: 1;
+    -fx-background-color: #26a;
 
 }

@@ -1,5 +1,6 @@
 package co.edu.uniquindio.poo.proyectofinalcinemauq.model.perfil;
 
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.recompensa.Canje;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.reporte.Notificacion;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.tarjeta.TarjetaVirtual;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.venta.Compra;
@@ -16,6 +17,7 @@ public class Cliente extends Usuario {
     private final CuentaPuntos puntos;
     private final List<Compra> listaCompras;
     private final List<Notificacion> listaNotificaciones;
+    private final List<Canje> listaCanjes;
 
     //Constructor
     public Cliente(String id, String nombre, String correo, String contrasenia, LocalDate fechaRegistro,
@@ -25,6 +27,7 @@ public class Cliente extends Usuario {
         this.puntos = new CuentaPuntos();
         this.listaCompras = new ArrayList<>();
         this.listaNotificaciones = new ArrayList<>();
+        this.listaCanjes = new ArrayList<>();
     }
 
     //operaciones
@@ -41,6 +44,17 @@ public class Cliente extends Usuario {
             throw new IllegalArgumentException("La notificación no puede ser nula");
         }
         listaNotificaciones.add(notificacion);
+    }
+
+    public void agregarCanje(Canje canje) {
+        if (canje == null) {
+            throw new IllegalArgumentException("El canje no puede ser nulo");
+        }
+        listaCanjes.add(canje);
+    }
+
+    public List<Canje> getListaCanjes() {
+        return Collections.unmodifiableList(listaCanjes);
     }
 
     public List<Notificacion> getListaNotificaciones() {
