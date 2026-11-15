@@ -1,5 +1,6 @@
 package co.edu.uniquindio.poo.proyectofinalcinemauq.model.recompensa;
 
+// Un punto por cada $100 de valor: entre más caro el premio, más puntos cuesta
 public class ReglaCostoPorValor implements ReglaCostoRedencion {
 
     private static final double VALOR_POR_PUNTO = 100;

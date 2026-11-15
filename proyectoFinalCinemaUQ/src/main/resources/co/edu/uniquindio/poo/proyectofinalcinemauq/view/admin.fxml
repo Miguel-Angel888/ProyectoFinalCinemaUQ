@@ -57,6 +57,21 @@
                     </columns>
                 </TableView>
             </VBox>
+
+            <VBox styleClass="panel" VBox.vgrow="ALWAYS">
+                <Label text="VALES DE CONFITERÍA POR ENTREGAR" styleClass="seccion"/>
+                <TableView fx:id="tablaVales" VBox.vgrow="ALWAYS">
+                    <columns>
+                        <TableColumn fx:id="colValCliente" text="Cliente" prefWidth="200"/>
+                        <TableColumn fx:id="colValCodigo" text="Código" prefWidth="140"/>
+                        <TableColumn fx:id="colValRecompensa" text="Recompensa" prefWidth="240"/>
+                        <TableColumn fx:id="colValFecha" text="Fecha del canje" prefWidth="160"/>
+                    </columns>
+                </TableView>
+                <HBox spacing="10" alignment="CENTER_RIGHT">
+                    <Button text="MARCAR COMO ENTREGADO" styleClass="boton-principal" onAction="#onEntregarVale"/>
+                </HBox>
+            </VBox>
         </VBox>
     </center>
 </BorderPane>

@@ -46,6 +46,14 @@ public class Producto implements ItemConfiteria {
         stock -= cantidad;
     }
 
+    @Override
+    public void reponerStock(int cantidad) {
+        if (cantidad <= 0) {
+            throw new IllegalArgumentException("La cantidad a reponer debe ser mayor a cero");
+        }
+        stock += cantidad;
+    }
+
     //Getters y setters
 
     @Override

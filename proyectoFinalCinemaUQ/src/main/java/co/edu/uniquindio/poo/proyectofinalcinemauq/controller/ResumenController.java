@@ -13,7 +13,13 @@ import co.edu.uniquindio.poo.proyectofinalcinemauq.model.venta.Compra;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.venta.Entrada;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.venta.LineaCompra;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.util.Formato;
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.recompensa.Canje;
+import javafx.collections.FXCollections;
 import javafx.fxml.FXML;
+import javafx.scene.control.ComboBox;
+import javafx.util.StringConverter;
+
+import java.util.List;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.Separator;
@@ -31,6 +37,7 @@ public class ResumenController {
     @FXML private Label lblPuntos;
     @FXML private Label lblTotal;
     @FXML private Button btnPagar;
+    @FXML private ComboBox<Canje> cmbBono;
 
     private final CinemaFacade facade = CinemaFacade.getInstance();
     private final SesionCompra sesion = SesionCompra.get();
@@ -38,9 +45,35 @@ public class ResumenController {
 
     @FXML
     private void initialize() {
+        // Bonos de entrada que el cliente canjeó con puntos y todavía no ha gastado
+        List<Canje> bonos = facade.getBonosEntradaDisponibles(Navegador.clienteActual());
+        cmbBono.setItems(FXCollections.observableArrayList(bonos));
+        cmbBono.setDisable(bonos.isEmpty());
+        cmbBono.setPromptText(bonos.isEmpty() ? "No tienes bonos" : "Elegir bono (opcional)");
+        cmbBono.setConverter(new StringConverter<>() {
+            @Override
+            public String toString(Canje c) {
+                return c == null ? "" : c.getRecompensa().getNombre() + " · " + c.getCodigo();
+            }
+
+            @Override
+            public Canje fromString(String texto) {
+                return null;
+            }
+        });
+
+        armarCompra(null);
+        // Al elegir (o quitar) un bono se vuelve a cotizar la compra con el descuento
+        cmbBono.valueProperty().addListener((obs, anterior, nuevo) -> armarCompra(nuevo));
+    }
+
+    // Arma la compra (con o sin bono) y dibuja el resumen
+    private void armarCompra(Canje bono) {
+        contenedorDetalle.getChildren().clear();
+        btnPagar.setDisable(false);
         try {
             compra = facade.prepararCompra(sesion.getFuncion(), sesion.getAsientos(),
-                    sesion.getTipoEntrada(), sesion.getConfiteria());
+                    sesion.getTipoEntrada(), sesion.getConfiteria(), bono);
         } catch (CinemaUQException e) {
             btnPagar.setDisable(true);
             Label error = new Label("No se pudo preparar la compra: " + e.getMessage());
@@ -51,6 +84,11 @@ public class ResumenController {
         }
         mostrarDetalle();
         mostrarPago();
+    }
+
+    @FXML
+    private void onQuitarBono() {
+        cmbBono.setValue(null);
     }
 
     private void mostrarDetalle() {
@@ -93,10 +131,11 @@ public class ResumenController {
         lblTotal.setText(Formato.moneda(compra.getTotal()));
 
         if (tarjeta.puedePagar(compra.getTotal())) {
+            lblSaldoDespues.getStyleClass().remove("error");
             lblSaldoDespues.setText(Formato.moneda(tarjeta.getSaldo() - compra.getTotal()));
         } else {
             lblSaldoDespues.setText("Saldo insuficiente");
-            lblSaldoDespues.getStyleClass().add("error");
+            if (!lblSaldoDespues.getStyleClass().contains("error")) lblSaldoDespues.getStyleClass().add("error");
         }
         lblPuntos.setText("Ganarás " + facade.calcularPuntos(compra.getTotal()) + " puntos con esta compra.\n"
                 + "Disponibles hoy: " + facade.getPuntosDisponibles(cliente));

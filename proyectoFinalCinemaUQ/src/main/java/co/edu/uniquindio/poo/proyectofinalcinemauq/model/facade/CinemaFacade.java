@@ -19,8 +19,10 @@ import co.edu.uniquindio.poo.proyectofinalcinemauq.model.recompensa.TipoRecompen
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.servicio.ReglaPuntosPorMonto;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.servicio.ServicioCanje;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.servicio.ServicioPago;
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.servicio.ServicioReembolso;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.tarjeta.EstadoSolicitud;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.tarjeta.Pago;
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.tarjeta.Reembolso;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.tarjeta.SolicitudRecarga;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.tarjeta.TarjetaProxy;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.tarjeta.TarjetaVirtual;
@@ -30,6 +32,7 @@ import co.edu.uniquindio.poo.proyectofinalcinemauq.model.venta.LineaCompra;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.venta.TipoEntrada;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -49,6 +52,7 @@ public class CinemaFacade {
     private final Cine cine;
     private final ServicioPago servicioPago;
     private final ServicioCanje servicioCanje;
+    private final ServicioReembolso servicioReembolso;
     private final CompraFacade compraFacade;
     private Usuario usuarioActual;
 
@@ -57,6 +61,7 @@ public class CinemaFacade {
         DatosIniciales.cargar(cine);
         this.servicioPago = new ServicioPago(new ReglaPuntosPorMonto());
         this.servicioCanje = new ServicioCanje(new ReglaCostoPorValor());
+        this.servicioReembolso = new ServicioReembolso();
         this.compraFacade = new CompraFacade(servicioPago);
     }
 
@@ -230,10 +235,37 @@ public class CinemaFacade {
         return resultado;
     }
 
+    // Vales de confitería canjeados que todavía no se han entregado (los ve el administrador)
+    public List<Canje> getValesConfiteriaPendientes() {
+        List<Canje> resultado = new ArrayList<>();
+        for (Cliente c : getClientes()) {
+            for (Canje canje : c.getListaCanjes()) {
+                if (canje.getRecompensa().getTipo() == TipoRecompensa.CONFITERIA && canje.estaDisponible()) {
+                    resultado.add(canje);
+                }
+            }
+        }
+        return resultado;
+    }
+
     // El personal de confitería marca el vale como entregado
     public void marcarCanjeUsado(Canje canje) throws CinemaUQException {
         validarAdministrador();
         canje.marcarUsado();
+    }
+
+    // ---------------- Cancelación y reembolso ----------------
+
+    // 0 significa que la compra ya no se puede cancelar
+    public double getPorcentajeReembolso(Compra compra) {
+        return servicioReembolso.porcentajeAplicable(compra, LocalDateTime.now());
+    }
+
+    public Reembolso cancelarCompra(Compra compra) throws CinemaUQException {
+        if (compra.getCliente() != getClienteActual()) {
+            throw new CompraInvalidaException("La compra no pertenece al cliente en sesión");
+        }
+        return servicioReembolso.reembolsar(compra, compraFacade.getMedioPago(compra.getCliente()), LocalDateTime.now());
     }
 
     public SolicitudRecarga solicitarRecarga(double monto) throws CinemaUQException {

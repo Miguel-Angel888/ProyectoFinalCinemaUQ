@@ -21,4 +21,7 @@ public interface ItemConfiteria {
     boolean hayStock(int cantidad);
 
     void descontarStock(int cantidad) throws StockInsuficienteException;
+
+    // Devuelve existencias (cuando se cancela una compra)
+    void reponerStock(int cantidad);
 }

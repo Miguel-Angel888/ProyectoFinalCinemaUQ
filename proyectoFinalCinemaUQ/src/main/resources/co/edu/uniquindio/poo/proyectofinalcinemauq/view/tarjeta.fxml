@@ -118,16 +118,22 @@
                     </VBox>
                 </Tab>
                 <Tab text="Mis compras">
-                    <TableView fx:id="tablaCompras">
-                        <columns>
-                            <TableColumn fx:id="colCmpFecha" text="Fecha" prefWidth="140"/>
-                            <TableColumn fx:id="colCmpPelicula" text="Película" prefWidth="200"/>
-                            <TableColumn fx:id="colCmpAsientos" text="Asientos" prefWidth="160"/>
-                            <TableColumn fx:id="colCmpTotal" text="Total" prefWidth="120"/>
-                            <TableColumn fx:id="colCmpPuntos" text="Puntos" prefWidth="80"/>
-                            <TableColumn fx:id="colCmpEstado" text="Estado" prefWidth="110"/>
-                        </columns>
-                    </TableView>
+                    <VBox spacing="10">
+                        <padding><Insets top="10" right="4" bottom="4" left="4"/></padding>
+                        <TableView fx:id="tablaCompras" VBox.vgrow="ALWAYS">
+                            <columns>
+                                <TableColumn fx:id="colCmpFecha" text="Fecha" prefWidth="140"/>
+                                <TableColumn fx:id="colCmpPelicula" text="Película" prefWidth="200"/>
+                                <TableColumn fx:id="colCmpAsientos" text="Asientos" prefWidth="160"/>
+                                <TableColumn fx:id="colCmpTotal" text="Total" prefWidth="120"/>
+                                <TableColumn fx:id="colCmpPuntos" text="Puntos" prefWidth="80"/>
+                                <TableColumn fx:id="colCmpEstado" text="Estado" prefWidth="110"/>
+                            </columns>
+                        </TableView>
+                        <HBox alignment="CENTER_RIGHT">
+                            <Button text="CANCELAR COMPRA SELECCIONADA" styleClass="boton-secundario" onAction="#onCancelarCompra"/>
+                        </HBox>
+                    </VBox>
                 </Tab>
             </TabPane>
         </VBox>

@@ -76,6 +76,11 @@ public class Combo implements ItemConfiteria {
         for (ItemConfiteria item : componentes) item.descontarStock(cantidad);
     }
 
+    @Override
+    public void reponerStock(int cantidad) {
+        for (ItemConfiteria item : componentes) item.reponerStock(cantidad);
+    }
+
     @Override public String getReferencia() { return referencia; }
     @Override public String getNombre() { return nombre; }
     public double getPorcentajeDescuento() { return porcentajeDescuento; }

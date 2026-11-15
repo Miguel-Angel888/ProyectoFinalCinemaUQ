@@ -66,6 +66,27 @@ public class CuentaPuntos {
         }
     }
 
+    //deshace los puntos ganados en una compra que se cancela. Se quitan de los lotes que vencen
+    //mas tarde, que es donde quedaron los puntos de esa compra reciente
+    public void revertir(int puntos, LocalDate fecha) throws CinemaUQException.PuntosInsuficientesException {
+        if (puntos <= 0) return;
+        if (getPuntosDisponibles(fecha) < puntos) {
+            throw new CinemaUQException.PuntosInsuficientesException(
+                    "No hay suficientes puntos para revertir. Puntos disponibles: " + getPuntosDisponibles(fecha));
+        }
+        List<AcumulacionPuntos> vigentes = new ArrayList<>();
+        for (AcumulacionPuntos a : listaAcumulaciones) {
+            if (!a.estaVencida(fecha)) vigentes.add(a);
+        }
+        vigentes.sort(Comparator.comparing(AcumulacionPuntos::getFechaVencimiento).reversed());
+
+        int pendientes = puntos;
+        for (AcumulacionPuntos a : vigentes) {
+            if (pendientes == 0) break;
+            pendientes -= a.consumir(pendientes);
+        }
+    }
+
     public List<AcumulacionPuntos> getListaAcumulaciones() {
         return Collections.unmodifiableList(listaAcumulaciones);
     }

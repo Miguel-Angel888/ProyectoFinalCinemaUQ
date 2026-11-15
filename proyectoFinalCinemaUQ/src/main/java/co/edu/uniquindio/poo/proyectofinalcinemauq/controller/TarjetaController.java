@@ -7,9 +7,11 @@ import co.edu.uniquindio.poo.proyectofinalcinemauq.model.facade.CinemaFacade;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.recompensa.Canje;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.recompensa.Recompensa;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.tarjeta.Movimiento;
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.tarjeta.Reembolso;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.tarjeta.SolicitudRecarga;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.tarjeta.TarjetaVirtual;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.venta.Compra;
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.venta.EstadoCompra;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.venta.Entrada;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.util.Formato;
 import javafx.beans.property.SimpleStringProperty;
@@ -205,6 +207,36 @@ public class TarjetaController {
             refrescar();
         } catch (CinemaUQException e) {
             Alertas.error("No se pudo canjear", e.getMessage());
+        }
+    }
+
+    @FXML
+    private void onCancelarCompra() {
+        Compra compra = tablaCompras.getSelectionModel().getSelectedItem();
+        if (compra == null) {
+            Alertas.error("Selecciona una compra", "Elige en la tabla la compra que quieres cancelar.");
+            return;
+        }
+        double porcentaje = facade.getPorcentajeReembolso(compra);
+        if (porcentaje == 0) {
+            Alertas.error("No se puede cancelar", compra.getEstado() != EstadoCompra.PAGADA
+                    ? "Solo se pueden cancelar compras pagadas."
+                    : "Faltan menos de 2 horas para la función o ya empezó.");
+            return;
+        }
+        double monto = compra.getTotal() * porcentaje / 100;
+        if (!Alertas.confirmar("Cancelar compra", "Se te devolverá el " + (int) porcentaje + " % ("
+                + Formato.moneda(monto) + ") a tu tarjeta y se descontarán los " + compra.getPuntosGanados()
+                + " puntos que ganaste con esta compra. ¿Continuar?")) {
+            return;
+        }
+        try {
+            Reembolso reembolso = facade.cancelarCompra(compra);
+            Alertas.info("Compra cancelada", "Reembolso " + reembolso.getReferencia() + " por "
+                    + Formato.moneda(reembolso.getCantidad()) + ".");
+            refrescar();
+        } catch (CinemaUQException e) {
+            Alertas.error("No se pudo cancelar", e.getMessage());
         }
     }
 

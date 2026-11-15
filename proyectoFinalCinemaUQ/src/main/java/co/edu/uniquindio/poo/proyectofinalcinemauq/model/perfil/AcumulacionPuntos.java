@@ -2,7 +2,7 @@ package co.edu.uniquindio.poo.proyectofinalcinemauq.model.perfil;
 
 import java.time.LocalDate;
 
-//cada acumulacion guarda su fecha, porque los puntos vencen un año despues de obtenidos
+//cada acumulacion guarda su fecha, porque los puntos vencen pasado un tiempo desde que se obtuvieron
 public class AcumulacionPuntos {
 
     public static final int MESES_VIGENCIA = 12;   // para cambiar la vigencia solo se toca este valor

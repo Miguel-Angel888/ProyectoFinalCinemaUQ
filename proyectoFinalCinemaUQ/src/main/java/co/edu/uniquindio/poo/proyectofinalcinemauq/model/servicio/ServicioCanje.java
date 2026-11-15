@@ -44,7 +44,7 @@ public class ServicioCanje {
             throw new IllegalArgumentException("El canje requiere un cliente y una recompensa");
         }
 
-        // 1. Validar antes de gastar puntos
+        // 1. Validar todo antes de gastar puntos
         ItemConfiteria item = recompensa.getItem();
         if (recompensa.getTipo() == TipoRecompensa.CONFITERIA && !item.hayStock(1)) {
             throw new StockInsuficienteException("Por ahora no hay existencias de " + recompensa.getNombre());
@@ -55,7 +55,7 @@ public class ServicioCanje {
 
         // 3. Entregar el premio
         if (item != null) item.descontarStock(1);
-        Canje canje = new Canje(recompensa);
+        Canje canje = new Canje(cliente, recompensa);
         cliente.agregarCanje(canje);
         cliente.agregarNotificacion(new Notificacion(cliente, "Canjeaste " + recompensa.getNombre()
                 + " por " + recompensa.getPuntosRequeridos() + " puntos. Código: " + canje.getCodigo()));
