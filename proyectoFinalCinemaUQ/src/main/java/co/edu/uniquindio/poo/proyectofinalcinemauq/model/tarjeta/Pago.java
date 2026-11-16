@@ -14,14 +14,19 @@ public class Pago {
     private final LocalDateTime fechaPago;
 
     public Pago(Compra compra, MedioPago tarjeta) {
-        if (compra == null || tarjeta == null) {
-            throw new IllegalArgumentException("El pago requiere una compra y una tarjeta");
+        this(compra, tarjeta, LocalDateTime.now());
+    }
+
+    // Permite registrar pagos históricos con su fecha real
+    public Pago(Compra compra, MedioPago tarjeta, LocalDateTime fechaPago) {
+        if (compra == null || tarjeta == null || fechaPago == null) {
+            throw new IllegalArgumentException("El pago requiere una compra, una tarjeta y una fecha");
         }
         this.referencia = "PAG-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
         this.compra = compra;
         this.tarjeta = tarjeta;
         this.cantidad = compra.getTotal();
-        this.fechaPago = LocalDateTime.now();
+        this.fechaPago = fechaPago;
     }
 
     public String getReferencia() { return referencia; }

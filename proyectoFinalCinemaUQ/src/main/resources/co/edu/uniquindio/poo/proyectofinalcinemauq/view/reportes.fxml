@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.DatePicker?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.control.Separator?>
+<?import javafx.scene.control.TableView?>
+<?import javafx.scene.layout.BorderPane?>
+<?import javafx.scene.layout.GridPane?>
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.Region?>
+<?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.VBox?>
+
+<BorderPane xmlns="http://javafx.com/javafx/21" xmlns:fx="http://javafx.com/fxml/1"
+            fx:controller="co.edu.uniquindio.poo.proyectofinalcinemauq.controller.ReportesController">
+
+    <top>
+        <HBox styleClass="barra">
+            <Label text="CinemaUQ" styleClass="logo"/>
+            <Label text="Reportes y estadísticas" styleClass="titulo"/>
+            <Region HBox.hgrow="ALWAYS"/>
+            <Button text="Volver al panel" styleClass="boton-secundario" onAction="#onVolver"/>
+        </HBox>
+    </top>
+
+    <left>
+        <VBox styleClass="panel" spacing="10" prefWidth="270">
+            <BorderPane.margin><Insets top="16" right="0" bottom="16" left="16"/></BorderPane.margin>
+
+            <Label text="TIPO DE REPORTE" styleClass="seccion"/>
+            <ListView fx:id="listaTipos" styleClass="lista-reportes" prefHeight="300" VBox.vgrow="ALWAYS"/>
+
+            <Label text="PERIODO CONSULTADO" styleClass="seccion"/>
+            <Label text="Desde" styleClass="texto-suave"/>
+            <DatePicker fx:id="dpDesde" maxWidth="Infinity"/>
+            <Label text="Hasta" styleClass="texto-suave"/>
+            <DatePicker fx:id="dpHasta" maxWidth="Infinity"/>
+            <HBox spacing="6">
+                <Button text="7 días" onAction="#onUltimos7" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                <Button text="30 días" onAction="#onUltimos30" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                <Button text="90 días" onAction="#onUltimos90" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+            </HBox>
+            <Button text="GENERAR REPORTE" styleClass="boton-principal" maxWidth="Infinity" onAction="#onGenerar"/>
+
+            <Separator/>
+            <Label text="EXPORTAR" styleClass="seccion"/>
+            <HBox spacing="6">
+                <Button text="Exportar TXT" onAction="#onExportarTxt" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+                <Button text="Exportar PDF" onAction="#onExportarPdf" HBox.hgrow="ALWAYS" maxWidth="Infinity"/>
+            </HBox>
+        </VBox>
+    </left>
+
+    <center>
+        <VBox spacing="12">
+            <padding><Insets top="16" right="16" bottom="16" left="16"/></padding>
+
+            <VBox styleClass="panel" spacing="4">
+                <Label fx:id="lblTitulo" styleClass="titulo"/>
+                <Label fx:id="lblDetalle" styleClass="texto-suave"/>
+            </VBox>
+
+            <StackPane fx:id="panelGrafico" styleClass="panel" minHeight="240" prefHeight="300" VBox.vgrow="ALWAYS"/>
+
+            <HBox spacing="12" prefHeight="230" minHeight="180">
+                <VBox styleClass="panel" HBox.hgrow="ALWAYS">
+                    <Label fx:id="lblRegistros" styleClass="seccion"/>
+                    <TableView fx:id="tablaDatos" VBox.vgrow="ALWAYS"/>
+                </VBox>
+                <VBox styleClass="panel" prefWidth="300" minWidth="260">
+                    <Label text="TOTALES" styleClass="seccion"/>
+                    <ScrollPane fitToWidth="true" VBox.vgrow="ALWAYS">
+                        <GridPane fx:id="gridTotales" hgap="10" vgap="6"/>
+                    </ScrollPane>
+                </VBox>
+            </HBox>
+        </VBox>
+    </center>
+</BorderPane>

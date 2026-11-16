@@ -1,8 +1,8 @@
 package co.edu.uniquindio.poo.proyectofinalcinemauq.model.reporte;
 
-import java.time.LocalDate;
-import java.util.List;
-
+// PATRÓN FACTORY METHOD
+// Quien exporta solo conoce esta interfaz; cada fábrica concreta decide
+// qué tipo de Reporte (TXT o PDF) se crea.
 public interface ReporteFactory {
-    Reporte crearReporte(String titulo, LocalDate desde, LocalDate hasta, List<String> lineas, double total);
+    Reporte crearReporte(DatosReporte datos);
 }

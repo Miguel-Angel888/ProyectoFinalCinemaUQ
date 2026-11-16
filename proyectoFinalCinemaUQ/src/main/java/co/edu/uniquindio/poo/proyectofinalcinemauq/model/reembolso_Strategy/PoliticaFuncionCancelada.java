@@ -15,4 +15,7 @@ public class PoliticaFuncionCancelada implements PoliticaReembolso {
 
     @Override
     public String getNombre() { return "Función cancelada por el cine"; }
+
+    @Override
+    public boolean exigePuntosIntactos() { return false; }
 }

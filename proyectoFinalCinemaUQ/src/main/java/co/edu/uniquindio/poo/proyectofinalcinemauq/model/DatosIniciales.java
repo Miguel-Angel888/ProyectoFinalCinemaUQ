@@ -9,6 +9,7 @@ import co.edu.uniquindio.poo.proyectofinalcinemauq.model.cartelera.TipoAsiento;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.exceptions.CinemaUQException;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.perfil.Administrador;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.perfil.Cliente;
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.perfil.Usuario;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.promocion.PromocionDiaSemana;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.promocion.PromocionPorCantidad;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.tarjeta.TarjetaVirtual;
@@ -20,6 +21,8 @@ import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.TemporalAdjusters;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
 
 // Datos de prueba para demostrar el funcionamiento de la aplicación
@@ -27,35 +30,69 @@ public class DatosIniciales {
 
     private DatosIniciales() { }
 
+    // Clientes extra que solo aparecen en el historial (todos con contraseña 1234)
+    private static final String[][] CLIENTES_HISTORIAL = {
+            {"1003", "Camila Torres", "camila@cinemauq.com"},
+            {"1004", "Santiago Ríos", "santiago@cinemauq.com"},
+            {"1005", "Valentina Ospina", "valentina@cinemauq.com"},
+            {"1006", "Mateo Cardona", "mateo@cinemauq.com"},
+            {"1007", "Laura Giraldo", "laura@cinemauq.com"},
+            {"1008", "Julián Hoyos", "julian@cinemauq.com"},
+            {"1009", "Sofía Marín", "sofia@cinemauq.com"},
+            {"1010", "Andrés Quintero", "andres@cinemauq.com"},
+    };
+
     public static void cargar(Cine cine) {
         try {
-            cargarUsuarios(cine);
+            List<Cliente> clientesHistorial = cargarUsuarios(cine);
             cargarCartelera(cine);
             cargarConfiteria(cine);
             cargarPromociones(cine);
+            // Funciones pasadas, compras, recargas, canjes y cancelaciones para los reportes
+            DatosHistoricos.cargar(cine, clientesHistorial, LocalDateTime.now());
+            cargarRecargasDeHoy(cine);
         } catch (CinemaUQException e) {
             throw new IllegalStateException("Error cargando los datos iniciales: " + e.getMessage(), e);
         }
     }
 
-    private static void cargarUsuarios(Cine cine) throws CinemaUQException {
+    // Devuelve los clientes que participan en el historial
+    private static List<Cliente> cargarUsuarios(Cine cine) {
         LocalDate hoy = LocalDate.now();
+        List<Cliente> clientesHistorial = new ArrayList<>();
 
-        TarjetaVirtual tarjetaAna = new TarjetaVirtual("CUQ-0001");
-        tarjetaAna.recargar(150000);
-        Cliente ana = new Cliente("1001", "Ana Gómez", "ana@cinemauq.com", "1234", hoy.minusYears(1), tarjetaAna);
+        Cliente ana = new Cliente("1001", "Ana Gómez", "ana@cinemauq.com", "1234", hoy.minusYears(1),
+                new TarjetaVirtual("CUQ-0001"));
         ana.getPuntos().acumular(120, hoy.minusMonths(13));   // ya vencidos
         ana.getPuntos().acumular(300, hoy.minusMonths(10));
         ana.getPuntos().acumular(500, hoy.minusMonths(2));
         cine.getUsuarios().add(ana);
+        clientesHistorial.add(ana);
 
-        TarjetaVirtual tarjetaLuis = new TarjetaVirtual("CUQ-0002");
-        tarjetaLuis.recargar(10000);   // poco saldo para probar el rechazo del pago
+        // Luis no tiene historial: así conserva poco saldo para probar el rechazo del pago
         cine.getUsuarios().add(new Cliente("1002", "Luis Restrepo", "luis@cinemauq.com", "1234",
-                hoy.minusMonths(3), tarjetaLuis));
+                hoy.minusMonths(3), new TarjetaVirtual("CUQ-0002")));
+
+        for (int i = 0; i < CLIENTES_HISTORIAL.length; i++) {
+            String[] datos = CLIENTES_HISTORIAL[i];
+            Cliente cliente = new Cliente(datos[0], datos[1], datos[2], "1234", hoy.minusMonths(6 + i),
+                    new TarjetaVirtual(String.format("CUQ-%04d", i + 3)));
+            cine.getUsuarios().add(cliente);
+            clientesHistorial.add(cliente);
+        }
 
         cine.getUsuarios().add(new Administrador("9001", "Administrador CinemaUQ", "admin@cinemauq.com",
                 "admin", hoy.minusYears(2), "EMP-001"));
+        return clientesHistorial;
+    }
+
+    // Se hacen después del historial para que los movimientos de la tarjeta queden en orden de fecha
+    private static void cargarRecargasDeHoy(Cine cine) throws CinemaUQException {
+        for (Usuario u : cine.getUsuarios()) {
+            if (!(u instanceof Cliente cliente)) continue;
+            if (cliente.getId().equals("1001")) cliente.getTarjetaVirtual().recargar(150000);
+            if (cliente.getId().equals("1002")) cliente.getTarjetaVirtual().recargar(10000);   // poco saldo para probar el rechazo del pago
+        }
     }
 
     private static void cargarCartelera(Cine cine) throws CinemaUQException {

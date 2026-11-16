@@ -3,8 +3,14 @@ package co.edu.uniquindio.poo.proyectofinalcinemauq.model.facade;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.Cine;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.DatosIniciales;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.cartelera.Asiento;
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.cartelera.EstadoFuncion;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.cartelera.Funcion;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.cartelera.Pelicula;
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.eventos.EventoCine;
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.eventos.NotificadorCliente;
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.eventos.PublicadorEventos;
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.eventos.RegistroEventos;
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.eventos.TipoEvento;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.exceptions.CinemaUQException;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.exceptions.CinemaUQException.*;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.perfil.Administrador;
@@ -16,11 +22,17 @@ import co.edu.uniquindio.poo.proyectofinalcinemauq.model.recompensa.Canje;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.recompensa.Recompensa;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.recompensa.ReglaCostoPorValor;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.recompensa.TipoRecompensa;
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.reporte.DatosReporte;
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.reporte.FormatoReporte;
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.reporte.TipoReporte;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.servicio.ReglaPuntosPorMonto;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.servicio.ServicioCanje;
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.servicio.ServicioEstadisticas;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.servicio.ServicioPago;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.servicio.ServicioReembolso;
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.servicio.ServicioReportes;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.tarjeta.EstadoSolicitud;
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.tarjeta.EstadoTarjeta;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.tarjeta.Pago;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.tarjeta.Reembolso;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.tarjeta.SolicitudRecarga;
@@ -31,6 +43,7 @@ import co.edu.uniquindio.poo.proyectofinalcinemauq.model.venta.ItemConfiteria;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.venta.LineaCompra;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.venta.TipoEntrada;
 
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -50,19 +63,33 @@ public class CinemaFacade {
     private static CinemaFacade instancia;
 
     private final Cine cine;
+    private final PublicadorEventos eventos;
+    private final RegistroEventos registroEventos;
     private final ServicioPago servicioPago;
     private final ServicioCanje servicioCanje;
     private final ServicioReembolso servicioReembolso;
     private final CompraFacade compraFacade;
+    private final ServicioEstadisticas servicioEstadisticas;
+    private final ServicioReportes servicioReportes;
     private Usuario usuarioActual;
 
     private CinemaFacade() {
         this.cine = new Cine("CinemaUQ");
         DatosIniciales.cargar(cine);
+
+        // PATRÓN OBSERVER: un solo publicador para todo el modelo. Cada evento llega
+        // al cliente como notificación y queda guardado en el registro del cine.
+        this.eventos = new PublicadorEventos();
+        this.registroEventos = new RegistroEventos();
+        eventos.suscribir(new NotificadorCliente());
+        eventos.suscribir(registroEventos);
+
         this.servicioPago = new ServicioPago(new ReglaPuntosPorMonto());
-        this.servicioCanje = new ServicioCanje(new ReglaCostoPorValor());
-        this.servicioReembolso = new ServicioReembolso();
-        this.compraFacade = new CompraFacade(servicioPago);
+        this.servicioCanje = new ServicioCanje(new ReglaCostoPorValor(), eventos);
+        this.servicioReembolso = new ServicioReembolso(eventos);
+        this.compraFacade = new CompraFacade(servicioPago, eventos);
+        this.servicioEstadisticas = new ServicioEstadisticas(cine);
+        this.servicioReportes = new ServicioReportes();
     }
 
     public static CinemaFacade getInstance() {
@@ -268,6 +295,57 @@ public class CinemaFacade {
         return servicioReembolso.reembolsar(compra, compraFacade.getMedioPago(compra.getCliente()), LocalDateTime.now());
     }
 
+    // Funciones que el administrador todavía puede cancelar (programadas y sin empezar)
+    public List<Funcion> getFuncionesProgramadas() {
+        List<Funcion> resultado = new ArrayList<>();
+        for (Funcion f : cine.getFunciones()) {
+            if (f.estaProgramada()) resultado.add(f);
+        }
+        resultado.sort(Comparator.comparing(Funcion::getFechaFuncion));
+        return resultado;
+    }
+
+    public int contarComprasPagadas(Funcion funcion) {
+        return comprasPagadasDe(funcion).size();
+    }
+
+    // El cine cancela la función: cada compra pagada se reembolsa al 100 % (PoliticaFuncionCancelada)
+    // y el cliente recibe la notificación por el Observer.
+    public List<Reembolso> cancelarFuncion(Funcion funcion) throws CinemaUQException {
+        validarAdministrador();
+        if (funcion == null || !funcion.estaProgramada()) {
+            throw new FuncionNoDisponibleException("Solo se pueden cancelar funciones programadas que no han empezado");
+        }
+        List<Compra> afectadas = comprasPagadasDe(funcion);
+        // Se valida antes de cambiar nada: el dinero tiene que poder volver a cada tarjeta
+        for (Compra compra : afectadas) {
+            TarjetaVirtual tarjeta = compra.getCliente().getTarjetaVirtual();
+            if (tarjeta.getEstadoTarjeta() != EstadoTarjeta.ACTIVA) {
+                throw new TarjetaInactivaException("No se puede cancelar la función: la tarjeta de "
+                        + compra.getCliente().getNombre() + " no está activa para recibir el reembolso");
+            }
+        }
+
+        funcion.setEstadoFuncion(EstadoFuncion.CANCELADA);
+        LocalDateTime ahora = LocalDateTime.now();
+        List<Reembolso> reembolsos = new ArrayList<>();
+        for (Compra compra : afectadas) {
+            reembolsos.add(servicioReembolso.reembolsarPorFuncionCancelada(compra,
+                    compraFacade.getMedioPago(compra.getCliente()), ahora));
+        }
+        return reembolsos;
+    }
+
+    private List<Compra> comprasPagadasDe(Funcion funcion) {
+        List<Compra> resultado = new ArrayList<>();
+        for (Compra compra : cine.getCompras()) {
+            if (compra.admiteReembolso() && compra.getListaEntradas().get(0).getFuncion() == funcion) {
+                resultado.add(compra);
+            }
+        }
+        return resultado;
+    }
+
     public SolicitudRecarga solicitarRecarga(double monto) throws CinemaUQException {
         SolicitudRecarga solicitud = new SolicitudRecarga(getClienteActual(), monto);
         cine.getSolicitudesRecarga().add(solicitud);
@@ -301,11 +379,38 @@ public class CinemaFacade {
         // Primero se recarga: si la tarjeta está inactiva la solicitud sigue pendiente
         solicitud.getCliente().getTarjetaVirtual().recargar(solicitud.getCantidad());
         solicitud.aprobar();
+        eventos.publicar(new EventoCine(TipoEvento.RECARGA_APROBADA, solicitud.getCliente(),
+                "Tu recarga " + solicitud.getReferencia() + " por $" + String.format("%,.0f", solicitud.getCantidad())
+                        + " fue aprobada."));
     }
 
     public void rechazarRecarga(SolicitudRecarga solicitud) throws CinemaUQException {
         validarAdministrador();
         solicitud.rechazar();
+        eventos.publicar(new EventoCine(TipoEvento.RECARGA_RECHAZADA, solicitud.getCliente(),
+                "Tu recarga " + solicitud.getReferencia() + " fue rechazada por el administrador."));
+    }
+
+    // ---------------- Reportes y estadísticas ----------------
+
+    public DatosReporte generarReporte(TipoReporte tipo, LocalDate desde, LocalDate hasta) throws CinemaUQException {
+        validarAdministrador();
+        return servicioEstadisticas.generar(tipo, desde, hasta);
+    }
+
+    public Path exportarReporte(DatosReporte datos, FormatoReporte formato, Path archivo) throws CinemaUQException {
+        validarAdministrador();
+        return servicioReportes.exportar(datos, formato, archivo);
+    }
+
+    public String nombreSugeridoReporte(DatosReporte datos, FormatoReporte formato) {
+        return servicioReportes.nombreSugerido(datos, formato);
+    }
+
+    // ---------------- Eventos (Observer) ----------------
+
+    public RegistroEventos getRegistroEventos() {
+        return registroEventos;
     }
 
     public List<Cliente> getClientes() {

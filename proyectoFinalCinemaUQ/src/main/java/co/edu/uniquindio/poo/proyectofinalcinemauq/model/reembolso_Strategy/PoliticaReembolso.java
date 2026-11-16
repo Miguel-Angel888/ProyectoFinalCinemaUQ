@@ -14,6 +14,12 @@ public interface PoliticaReembolso {
 
     String getNombre();
 
+    // Si es true, no se puede cancelar cuando el cliente ya gastó los puntos que ganó con la compra.
+    // Cuando cancela el cine no se le exige: se quitan solo los puntos que le queden.
+    default boolean exigePuntosIntactos() {
+        return true;
+    }
+
     // Horas que faltan para la función (negativas si ya empezó)
     default long horasRestantes(Funcion funcion, LocalDateTime ahora) {
         return Duration.between(ahora, funcion.getFechaFuncion()).toHours();

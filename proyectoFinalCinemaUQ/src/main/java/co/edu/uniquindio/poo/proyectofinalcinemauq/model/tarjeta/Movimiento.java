@@ -10,11 +10,15 @@ public abstract class Movimiento {
     private final double saldoResultante;
     private final String descripcion;
 
-    protected Movimiento(String referencia, double cantidad,
-                         double saldoResultante, String descripcion) {
+    // La fecha se recibe para poder registrar movimientos históricos y filtrarlos por periodo en los reportes
+    protected Movimiento(String referencia, double cantidad, double saldoResultante,
+                         String descripcion, LocalDateTime fechaMovimiento) {
+        if (fechaMovimiento == null) {
+            throw new IllegalArgumentException("El movimiento debe tener fecha");
+        }
         this.referencia = referencia;
         this.cantidad = cantidad;
-        this.fechaMovimiento = LocalDateTime.now();
+        this.fechaMovimiento = fechaMovimiento;
         this.saldoResultante = saldoResultante;
         this.descripcion = descripcion;
     }
