@@ -34,7 +34,10 @@ public class CompraFacade {
     private final PublicadorEventos eventos;
     private final Map<String, TarjetaProxy> proxiesTarjeta = new HashMap<>();
 
-    public CompraFacade(ServicioPago servicioPago) {
+    public CompraFacade(ServicioPago servicioPago, PublicadorEventos eventos) {
+        if (servicioPago == null || eventos == null) {
+            throw new IllegalArgumentException("La fachada de compra requiere el servicio de pago y el publicador de eventos");
+        }
         this.servicioPago = servicioPago;
         this.eventos = eventos;
     }

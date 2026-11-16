@@ -25,7 +25,10 @@ public class ServicioCanje {
     private final ReglaCostoRedencion reglaCosto;
     private final PublicadorEventos eventos;
 
-    public ServicioCanje(ReglaCostoRedencion reglaCosto) {
+    public ServicioCanje(ReglaCostoRedencion reglaCosto, PublicadorEventos eventos) {
+        if (reglaCosto == null || eventos == null) {
+            throw new IllegalArgumentException("El servicio de canje requiere una regla de costo y un publicador de eventos");
+        }
         this.reglaCosto = reglaCosto;
         this.eventos = eventos;
     }

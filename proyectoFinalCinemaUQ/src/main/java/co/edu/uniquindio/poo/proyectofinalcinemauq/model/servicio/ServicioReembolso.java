@@ -1,12 +1,9 @@
 package co.edu.uniquindio.poo.proyectofinalcinemauq.model.servicio;
 
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.cartelera.Funcion;
-
-
-import co.edu.uniquindio.poo.proyectofinalcinemauq.model.evento.EventoCine;
-import co.edu.uniquindio.poo.proyectofinalcinemauq.model.evento.PublicadorEventos;
-import co.edu.uniquindio.poo.proyectofinalcinemauq.model.evento.TipoEvento;
-
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.eventos.EventoCine;
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.eventos.PublicadorEventos;
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.eventos.TipoEvento;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.exceptions.CinemaUQException;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.exceptions.CinemaUQException.CompraInvalidaException;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.perfil.Cliente;
@@ -36,7 +33,7 @@ public class ServicioReembolso {
     private final List<PoliticaReembolso> politicas;
     private final PublicadorEventos eventos;
 
-    public ServicioReembolso() {
+    public ServicioReembolso(PublicadorEventos eventos) {
         this(eventos, List.of(
                 new PoliticaFuncionCancelada(),
                 new PoliticaReembolsoCompleto(),
@@ -44,7 +41,10 @@ public class ServicioReembolso {
                 new PoliticaSinReembolso()));
     }
 
-    public ServicioReembolso(co.edu.uniquindio.poo.proyectofinalcinemauq.model.servicio.PublicadorEventos eventos, List<PoliticaReembolso> politicas) {
+    public ServicioReembolso(PublicadorEventos eventos, List<PoliticaReembolso> politicas) {
+        if (eventos == null) {
+            throw new IllegalArgumentException("El servicio de reembolso requiere un publicador de eventos");
+        }
         if (politicas == null || politicas.isEmpty()) {
             throw new IllegalArgumentException("Se necesita al menos una política de reembolso");
         }

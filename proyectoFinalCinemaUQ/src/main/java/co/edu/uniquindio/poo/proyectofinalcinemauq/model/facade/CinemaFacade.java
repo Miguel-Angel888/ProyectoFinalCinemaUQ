@@ -5,6 +5,11 @@ import co.edu.uniquindio.poo.proyectofinalcinemauq.model.DatosIniciales;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.cartelera.Asiento;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.cartelera.Funcion;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.cartelera.Pelicula;
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.eventos.EventoCine;
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.eventos.NotificadorCliente;
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.eventos.PublicadorEventos;
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.eventos.RegistroEventos;
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.eventos.TipoEvento;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.exceptions.CinemaUQException;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.exceptions.CinemaUQException.*;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.perfil.Administrador;
@@ -50,6 +55,8 @@ public class CinemaFacade {
     private static CinemaFacade instancia;
 
     private final Cine cine;
+    private final PublicadorEventos eventos;
+    private final RegistroEventos registroEventos;
     private final ServicioPago servicioPago;
     private final ServicioCanje servicioCanje;
     private final ServicioReembolso servicioReembolso;
@@ -59,10 +66,18 @@ public class CinemaFacade {
     private CinemaFacade() {
         this.cine = new Cine("CinemaUQ");
         DatosIniciales.cargar(cine);
+
+        // PATRÓN OBSERVER: un solo publicador para todo el modelo. Cada evento llega
+        // al cliente como notificación y queda guardado en el registro del cine.
+        this.eventos = new PublicadorEventos();
+        this.registroEventos = new RegistroEventos();
+        eventos.suscribir(new NotificadorCliente());
+        eventos.suscribir(registroEventos);
+
         this.servicioPago = new ServicioPago(new ReglaPuntosPorMonto());
-        this.servicioCanje = new ServicioCanje(new ReglaCostoPorValor());
-        this.servicioReembolso = new ServicioReembolso();
-        this.compraFacade = new CompraFacade(servicioPago);
+        this.servicioCanje = new ServicioCanje(new ReglaCostoPorValor(), eventos);
+        this.servicioReembolso = new ServicioReembolso(eventos);
+        this.compraFacade = new CompraFacade(servicioPago, eventos);
     }
 
     public static CinemaFacade getInstance() {
@@ -301,11 +316,22 @@ public class CinemaFacade {
         // Primero se recarga: si la tarjeta está inactiva la solicitud sigue pendiente
         solicitud.getCliente().getTarjetaVirtual().recargar(solicitud.getCantidad());
         solicitud.aprobar();
+        eventos.publicar(new EventoCine(TipoEvento.RECARGA_APROBADA, solicitud.getCliente(),
+                "Tu recarga " + solicitud.getReferencia() + " por $" + String.format("%,.0f", solicitud.getCantidad())
+                        + " fue aprobada."));
     }
 
     public void rechazarRecarga(SolicitudRecarga solicitud) throws CinemaUQException {
         validarAdministrador();
         solicitud.rechazar();
+        eventos.publicar(new EventoCine(TipoEvento.RECARGA_RECHAZADA, solicitud.getCliente(),
+                "Tu recarga " + solicitud.getReferencia() + " fue rechazada por el administrador."));
+    }
+
+    // ---------------- Eventos (Observer) ----------------
+
+    public RegistroEventos getRegistroEventos() {
+        return registroEventos;
     }
 
     public List<Cliente> getClientes() {
