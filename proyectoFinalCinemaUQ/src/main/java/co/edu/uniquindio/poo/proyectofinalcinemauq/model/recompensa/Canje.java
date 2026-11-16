@@ -17,14 +17,19 @@ public class Canje {
     private EstadoCanje estado;
 
     public Canje(Cliente cliente, Recompensa recompensa) {
-        if (cliente == null || recompensa == null) {
-            throw new IllegalArgumentException("El canje requiere un cliente y una recompensa");
+        this(cliente, recompensa, LocalDateTime.now());
+    }
+
+    // Permite registrar canjes históricos (para el reporte de puntos redimidos)
+    public Canje(Cliente cliente, Recompensa recompensa, LocalDateTime fecha) {
+        if (cliente == null || recompensa == null || fecha == null) {
+            throw new IllegalArgumentException("El canje requiere un cliente, una recompensa y una fecha");
         }
         this.cliente = cliente;
         this.codigo = "CNJ-" + UUID.randomUUID().toString().substring(0, 8).toUpperCase();
         this.recompensa = recompensa;
         this.puntosUsados = recompensa.getPuntosRequeridos();
-        this.fecha = LocalDateTime.now();
+        this.fecha = fecha;
         this.estado = EstadoCanje.DISPONIBLE;
     }
 

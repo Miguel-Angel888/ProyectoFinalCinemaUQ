@@ -1,6 +1,7 @@
 package co.edu.uniquindio.poo.proyectofinalcinemauq.model.tarjeta;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.exceptions.CinemaUQException;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -57,27 +58,40 @@ public class TarjetaVirtual implements MedioPago {
     //operaciones
 
     public void recargar(double monto) throws CinemaUQException.MontoInvalidoException, CinemaUQException.TarjetaInactivaException {
+        recargar(monto, LocalDateTime.now());
+    }
+
+    // Las versiones con fecha permiten registrar el historial de la tarjeta (datos iniciales y reportes)
+    public void recargar(double monto, LocalDateTime fecha) throws CinemaUQException.MontoInvalidoException, CinemaUQException.TarjetaInactivaException {
         validarMonto(monto);
         validarActiva();
         saldo += monto;
-        listaMovimientos.add(recargaCreator.registrar(monto, saldo, "Recarga de saldo"));
+        listaMovimientos.add(recargaCreator.registrar(monto, saldo, "Recarga de saldo", fecha));
     }
 
     public void debitar (double monto, String descripcion) throws CinemaUQException.MontoInvalidoException, CinemaUQException.TarjetaInactivaException, CinemaUQException.SaldoInsuficienteException {
+        debitar(monto, descripcion, LocalDateTime.now());
+    }
+
+    public void debitar (double monto, String descripcion, LocalDateTime fecha) throws CinemaUQException.MontoInvalidoException, CinemaUQException.TarjetaInactivaException, CinemaUQException.SaldoInsuficienteException {
         validarMonto(monto);
         validarActiva();
         if (saldo < monto) {
             throw new CinemaUQException.SaldoInsuficienteException("Saldo insuficiente. Saldo disponible: " + saldo);
         }
         saldo -= monto;
-        listaMovimientos.add(pagoCreator.registrar(monto, saldo, descripcion));
+        listaMovimientos.add(pagoCreator.registrar(monto, saldo, descripcion, fecha));
     }
 
     public void acreditar (double monto, String descripcion) throws CinemaUQException.MontoInvalidoException, CinemaUQException.TarjetaInactivaException {
+        acreditar(monto, descripcion, LocalDateTime.now());
+    }
+
+    public void acreditar (double monto, String descripcion, LocalDateTime fecha) throws CinemaUQException.MontoInvalidoException, CinemaUQException.TarjetaInactivaException {
         validarMonto(monto);
         validarActiva();
         saldo += monto;
-        listaMovimientos.add(reembolsoCreator.registrar(monto, saldo, descripcion));
+        listaMovimientos.add(reembolsoCreator.registrar(monto, saldo, descripcion, fecha));
     }
 
     public boolean puedePagar(double monto) {
