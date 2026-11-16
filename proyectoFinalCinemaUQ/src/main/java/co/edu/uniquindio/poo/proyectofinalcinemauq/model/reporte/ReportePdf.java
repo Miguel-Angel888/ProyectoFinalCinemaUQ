@@ -8,32 +8,33 @@ import org.apache.pdfbox.pdmodel.font.PDType1Font;
 import org.apache.pdfbox.pdmodel.font.Standard14Fonts;
 
 import java.io.IOException;
-import java.time.LocalDate;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ReportePdf extends Reporte {
 
-    private static final float MARGEN = 50;
-    private static final float TAMANO_FUENTE = 10;
-    private static final float INTERLINEADO = 15;
-    private static final int MAX_CARACTERES = 80;   // ancho útil de A4 con Courier 10
+    private static final float MARGEN = 40;
+    private static final float TAMANO_TITULO = 12;
+    private static final float TAMANO_FUENTE = 8;
+    private static final float INTERLINEADO = 11;
+    private static final int MAX_CARACTERES = 105;   // ancho útil de A4 con Courier 8
 
-    public ReportePdf(String titulo, LocalDate desde, LocalDate hasta,
-                      List<String> lineas, double total) {
-        super(titulo, desde, hasta, lineas, total);
+    public ReportePdf(DatosReporte datos) {
+        super(datos);
     }
 
     @Override
-    public void exportar(String ruta) throws IOException {
-        List<String> lineasPdf = prepararLineas(construirTexto());
+    public void exportar(Path archivo) throws IOException {
+        List<String> lineasPdf = prepararLineas(construirLineas());
 
         try (PDDocument documento = new PDDocument()) {
             PDType1Font fuente = new PDType1Font(Standard14Fonts.FontName.COURIER);
+            PDType1Font fuenteTitulo = new PDType1Font(Standard14Fonts.FontName.COURIER_BOLD);
             PDPageContentStream contenido = null;
             float y = 0;
 
-            for (String linea : lineasPdf) {
+            for (int i = 0; i < lineasPdf.size(); i++) {
                 // Página nueva al inicio o cuando se acaba el espacio
                 if (contenido == null || y < MARGEN) {
                     if (contenido != null) contenido.close();
@@ -42,24 +43,26 @@ public class ReportePdf extends Reporte {
                     contenido = new PDPageContentStream(documento, pagina);
                     y = pagina.getMediaBox().getHeight() - MARGEN;
                 }
+                boolean esTitulo = i == 0;
                 contenido.beginText();
-                contenido.setFont(fuente, TAMANO_FUENTE);
+                contenido.setFont(esTitulo ? fuenteTitulo : fuente, esTitulo ? TAMANO_TITULO : TAMANO_FUENTE);
                 contenido.newLineAtOffset(MARGEN, y);
-                contenido.showText(linea);
+                contenido.showText(lineasPdf.get(i));
                 contenido.endText();
-                y -= INTERLINEADO;
+                y -= esTitulo ? INTERLINEADO * 1.6f : INTERLINEADO;
             }
 
             if (contenido != null) contenido.close();
-            documento.save(ruta);
+            documento.save(archivo.toFile());
         }
     }
 
-    // PDFBox no acepta saltos de línea ni tabulaciones dentro de showText
-    // entonces se separa el texto en líneas y se parten las muy largas
-    private List<String> prepararLineas(String texto) {
+    // PDFBox no acepta saltos de línea ni tabulaciones dentro de showText,
+    // y la fuente estándar solo tiene caracteres latinos: se limpia y se parten las líneas largas
+    private List<String> prepararLineas(List<String> lineas) {
         List<String> resultado = new ArrayList<>();
-        for (String linea : texto.replace("\r", "").replace("\t", "    ").split("\n", -1)) {
+        for (String original : lineas) {
+            String linea = limpiar(original);
             while (linea.length() > MAX_CARACTERES) {
                 resultado.add(linea.substring(0, MAX_CARACTERES));
                 linea = linea.substring(MAX_CARACTERES);
@@ -67,5 +70,16 @@ public class ReportePdf extends Reporte {
             resultado.add(linea);
         }
         return resultado;
+    }
+
+    private static String limpiar(String texto) {
+        StringBuilder sb = new StringBuilder(texto.length());
+        for (char c : texto.toCharArray()) {
+            if (c == '\t') sb.append("    ");
+            else if (Character.isWhitespace(c) || Character.isSpaceChar(c)) sb.append(' ');   // incluye espacios no separables
+            else if ((c >= 0x20 && c <= 0x7E) || (c >= 0xA1 && c <= 0xFF)) sb.append(c);
+            else sb.append('?');
+        }
+        return sb.toString();
     }
 }

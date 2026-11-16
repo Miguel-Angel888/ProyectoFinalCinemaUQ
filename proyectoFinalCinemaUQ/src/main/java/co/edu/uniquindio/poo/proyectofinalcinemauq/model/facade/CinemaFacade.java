@@ -22,10 +22,15 @@ import co.edu.uniquindio.poo.proyectofinalcinemauq.model.recompensa.Canje;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.recompensa.Recompensa;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.recompensa.ReglaCostoPorValor;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.recompensa.TipoRecompensa;
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.reporte.DatosReporte;
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.reporte.FormatoReporte;
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.reporte.TipoReporte;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.servicio.ReglaPuntosPorMonto;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.servicio.ServicioCanje;
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.servicio.ServicioEstadisticas;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.servicio.ServicioPago;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.servicio.ServicioReembolso;
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.servicio.ServicioReportes;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.tarjeta.EstadoSolicitud;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.tarjeta.EstadoTarjeta;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.tarjeta.Pago;
@@ -38,6 +43,7 @@ import co.edu.uniquindio.poo.proyectofinalcinemauq.model.venta.ItemConfiteria;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.venta.LineaCompra;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.venta.TipoEntrada;
 
+import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -63,6 +69,8 @@ public class CinemaFacade {
     private final ServicioCanje servicioCanje;
     private final ServicioReembolso servicioReembolso;
     private final CompraFacade compraFacade;
+    private final ServicioEstadisticas servicioEstadisticas;
+    private final ServicioReportes servicioReportes;
     private Usuario usuarioActual;
 
     private CinemaFacade() {
@@ -80,6 +88,8 @@ public class CinemaFacade {
         this.servicioCanje = new ServicioCanje(new ReglaCostoPorValor(), eventos);
         this.servicioReembolso = new ServicioReembolso(eventos);
         this.compraFacade = new CompraFacade(servicioPago, eventos);
+        this.servicioEstadisticas = new ServicioEstadisticas(cine);
+        this.servicioReportes = new ServicioReportes();
     }
 
     public static CinemaFacade getInstance() {
@@ -379,6 +389,22 @@ public class CinemaFacade {
         solicitud.rechazar();
         eventos.publicar(new EventoCine(TipoEvento.RECARGA_RECHAZADA, solicitud.getCliente(),
                 "Tu recarga " + solicitud.getReferencia() + " fue rechazada por el administrador."));
+    }
+
+    // ---------------- Reportes y estadísticas ----------------
+
+    public DatosReporte generarReporte(TipoReporte tipo, LocalDate desde, LocalDate hasta) throws CinemaUQException {
+        validarAdministrador();
+        return servicioEstadisticas.generar(tipo, desde, hasta);
+    }
+
+    public Path exportarReporte(DatosReporte datos, FormatoReporte formato, Path archivo) throws CinemaUQException {
+        validarAdministrador();
+        return servicioReportes.exportar(datos, formato, archivo);
+    }
+
+    public String nombreSugeridoReporte(DatosReporte datos, FormatoReporte formato) {
+        return servicioReportes.nombreSugerido(datos, formato);
     }
 
     // ---------------- Eventos (Observer) ----------------
