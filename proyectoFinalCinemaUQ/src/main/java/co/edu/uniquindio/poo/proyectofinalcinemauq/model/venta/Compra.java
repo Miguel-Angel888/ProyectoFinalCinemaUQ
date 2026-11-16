@@ -8,6 +8,8 @@ import co.edu.uniquindio.poo.proyectofinalcinemauq.model.promocion.DescuentoApli
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.promocion.Promocion;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.tarjeta.Pago;
 import co.edu.uniquindio.poo.proyectofinalcinemauq.model.tarjeta.Reembolso;
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.venta.estado.EstadoDeCompra;
+import co.edu.uniquindio.poo.proyectofinalcinemauq.model.venta.estado.EstadoPendiente;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -15,6 +17,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.UUID;
 
+// PATRÓN STATE - Contexto
+// La compra guarda su estado actual como objeto y le delega qué se puede hacer
+// (pagar, reembolsar, descartar). Así no hay condicionales sobre el estado aquí.
 public class Compra {
 
     // Atributos
@@ -28,7 +33,7 @@ public class Compra {
     private final double descuento;
     private final double total;
     private final List<DescuentoAplicado> descuentosAplicados;
-    private EstadoCompra estado;
+    private EstadoDeCompra estado;
     private int puntosGanados;
     private Pago pago;
     private Reembolso reembolso;
@@ -36,11 +41,11 @@ public class Compra {
     private Compra(CompraBuilder builder) {
         this.id = builder.id;
         this.cliente = builder.cliente;
-        this.fecha = LocalDateTime.now();
+        this.fecha = builder.fecha != null ? builder.fecha : LocalDateTime.now();
         this.listaEntradas = new ArrayList<>(builder.listaEntradas);
         this.listaLineas = new ArrayList<>(builder.listaLineas);
         this.promociones = new ArrayList<>(builder.promociones);
-        this.estado = EstadoCompra.PENDIENTE;
+        this.estado = new EstadoPendiente();
 
         this.subtotal = calcularSubtotal();
         Cotizacion cotizacion = aplicarPromociones();
@@ -68,26 +73,34 @@ public class Compra {
         return cotizacion;
     }
 
-    // registros
+    // Transiciones: el estado actual valida y devuelve el siguiente.
+    // Los datos solo se guardan si la transición fue aceptada.
     public void registrarPago(Pago pago, int puntosGanados) throws CompraInvalidaException {
-        if (estado != EstadoCompra.PENDIENTE) {
-            throw new CompraInvalidaException("Solo se puede pagar una compra pendiente");
+        if (pago == null) {
+            throw new IllegalArgumentException("El pago no puede ser nulo");
         }
+        EstadoDeCompra siguiente = estado.pagar();
         this.pago = pago;
         this.puntosGanados = puntosGanados;
-        this.estado = EstadoCompra.PAGADA;
+        this.estado = siguiente;
     }
 
     public void registrarReembolso(Reembolso reembolso) throws CompraInvalidaException {
-        if (estado != EstadoCompra.PAGADA) {
-            throw new CompraInvalidaException("Solo se puede cancelar una compra pagada");
+        if (reembolso == null) {
+            throw new IllegalArgumentException("El reembolso no puede ser nulo");
         }
-        if (this.reembolso != null) {
-            throw new CompraInvalidaException("Esta compra ya fue reembolsada");
-        }
+        EstadoDeCompra siguiente = estado.reembolsar();
         this.reembolso = reembolso;
-        this.estado = EstadoCompra.CANCELADA;
+        this.estado = siguiente;
     }
+
+    // Descarta una compra que todavía no se ha pagado
+    public void cancelar() throws CompraInvalidaException {
+        this.estado = estado.cancelar();
+    }
+
+    public boolean admiteReembolso() { return estado.admiteReembolso(); }
+    public boolean fueCobrada() { return estado.fueCobrada(); }
 
     // Getters
     public String getId() { return id; }
@@ -100,7 +113,7 @@ public class Compra {
     public double getDescuento() { return descuento; }
     public List<DescuentoAplicado> getDescuentosAplicados() { return Collections.unmodifiableList(descuentosAplicados); }
     public double getTotal() { return total; }
-    public EstadoCompra getEstado() { return estado; }
+    public EstadoCompra getEstado() { return estado.getTipo(); }
     public int getPuntosGanados() { return puntosGanados; }
     public Pago getPago() { return pago; }
     public Reembolso getReembolso() { return reembolso; }
@@ -110,11 +123,14 @@ public class Compra {
 
         private String id = UUID.randomUUID().toString();
         private Cliente cliente;
+        private LocalDateTime fecha;   // si no se indica, se usa el momento en que se arma
         private final List<Entrada> listaEntradas = new ArrayList<>();
         private final List<LineaCompra> listaLineas = new ArrayList<>();
         private final List<Promocion> promociones = new ArrayList<>();
 
         public CompraBuilder conId(String id) { this.id = id; return this; }
+
+        public CompraBuilder conFecha(LocalDateTime fecha) { this.fecha = fecha; return this; }
 
         public CompraBuilder conCliente(Cliente cliente) { this.cliente = cliente; return this; }
 
